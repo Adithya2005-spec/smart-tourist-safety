@@ -1,19 +1,17 @@
-# 🛡️ Suraksha Link (सुरक्षा लिंक) — Smart Tourist Safety Portal
+# 🛡️ Suraksha Link — Smart Tourist Safety Portal
 
 <div align="center">
 
-![Project Status](https://img.shields.io/badge/Status-Prototype%20Ready-success?style=for-the-badge)
-![Hackathon](https://img.shields.io/badge/Smart%20India%20Hackathon-SIH%20Edition-blue?style=for-the-badge)
-![Coverage](https://img.shields.io/badge/Pan--India-28%20States%20%2B%208%20UTs-orange?style=for-the-badge)
-![Edge Layer](https://img.shields.io/badge/Architecture-Offline--First%20Edge-emerald?style=for-the-badge)
-![Blockchain](https://img.shields.io/badge/Audit%20Trail-Solidity%20%2F%20EVM-purple?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Live%20Prototype-success?style=for-the-badge\&logoColor=white)
+![Hackathon](https://img.shields.io/badge/Smart%20India%20Hackathon-2024-blue?style=for-the-badge)
+![Coverage](https://img.shields.io/badge/Coverage-36%20States%20%2B%20UTs-orange?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-lightgrey?style=for-the-badge)
 
 <br/>
 
-**A Next-Generation Offline-First Tourist Safety Monitoring, Incident Dispatch, Contextual AI Risk Assessment, & Blockchain-Anchored Audit System.**
+**An offline-first tourist safety platform with real-time SOS, AI risk assessment, authority command centre, and blockchain-anchored audit trail.**
 
-[Key Features](#-key-features) • [System Architecture](#-system-architecture) • [Pan-India Coverage](#-pan-india-36-states--uts-matrix) • [Tech Stack](#-technology-stack) • [Quickstart](#-getting-started) • [Demo Script](#-jury-demonstration-script)
+[Features](#-features) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [Deploy](#-deployment) • [Demo Script](#-demo-script)
 
 ---
 
@@ -21,388 +19,235 @@
 
 ## 📌 Table of Contents
 
-- [Overview & Vision](#-overview--vision)
-- [Key Features](#-key-features)
-  - [Traveller Safety Portal (Tourist Hub)](#1-traveller-safety-portal-tourist-hub)
-  - [Authority Command & Control Centre](#2-authority-command--control-centre)
-  - [Pan-India Multi-Territory Support](#3-pan-india-multi-territory-support)
-  - [Explainable AI Risk Engine & Guardian AI](#4-explainable-ai-risk-engine--guardian-ai)
-  - [Privacy-Preserving Blockchain Audit Layer](#5-privacy-preserving-blockchain-audit-layer)
+- [Overview](#-overview)
+- [Features](#-features)
 - [System Architecture](#-system-architecture)
-  - [Edge vs Cloud Availability Matrix](#edge-vs-cloud-availability-matrix)
-  - [Incident State Machine](#incident-state-machine)
-- [Solidity Smart Contract (`SafetyAudit.sol`)](#-smart-contract-specification)
-- [Technology Stack](#-technology-stack)
-- [Project Directory Structure](#-project-directory-structure)
-- [Getting Started & Local Installation](#-getting-started)
-- [Running Tests & Quality Assurance](#-running-tests--qa)
-- [Jury Demonstration Script (Step-by-Step)](#-jury-demonstration-script)
-- [Privacy, Security & Ethical AI Posture](#-security-privacy--ethical-ai-posture)
-- [Future Roadmap](#-future-production-roadmap)
+- [Tech Stack](#-tech-stack)
+- [Getting Started](#-getting-started)
+- [Deployment](#-deployment)
+- [Running Tests](#-running-tests)
+- [Demo Script](#-demo-script)
 - [License](#-license)
 
 ---
 
-## 🌟 Overview & Vision
+## 🌟 Overview
 
-**Suraksha Link** is an end-to-end tourist safety coordination platform built to protect domestic and international travelers across India. Designed to overcome critical challenges in remote areas—such as erratic cellular connectivity, language barriers, fragmented emergency response units, and unverified incidents—Suraksha Link delivers a dual-portal solution:
+**Suraksha Link** is a dual-portal tourist safety system built for India's 36 states and UTs.
 
-1. **Traveller Safety Portal**: An offline-first web companion empowering tourists with 1-tap SOS broadcasting, cached risk zones, on-device geofencing, state-specific emergency directories, time-bound location sharing, and a context-aware Guardian AI advisor.
-2. **Authority Command Centre**: A role-gated administrative suite for law enforcement and emergency responders, providing real-time incident queues, one-click unit dispatch with ETA computation, explainable AI risk heatmaps, digital identity verification, and tamper-evident blockchain audit logging.
+- **Tourist Portal** — 1-tap SOS, offline-first geofencing, state emergency directories, Guardian AI advisor, location sharing
+- **Authority Centre** — Role-gated incident queue, unit dispatch, AI risk heatmaps, blockchain audit log
 
-> 🛡️ **Prototype Integrity & Transparency:** All map zones, telemetry feeds, risk-model inputs, and incident histories included in the repository are synthetic demonstration seed records. The prototype showcases production-ready architecture, clear interface boundaries, and resilient failover mechanisms.
+> All map data, telemetry, and incident records in this repo are **synthetic demo seeds** for prototype demonstration only.
 
 ---
 
-## 🚀 Key Features
+## 🚀 Features
 
-### 1. Traveller Safety Portal (Tourist Hub)
-- **🚨 1-Tap Instant SOS:** Triggers an immediate emergency alert with real-time GPS coordinates, calculated local risk score, active state context, and incident categorization (Medical, Harassment, Lost, Suspicious Activity).
-- **📶 Offline-First SOS Queue:** When internet connectivity is severed, emergency requests and audit events are queued in local persistent storage (`PENDING_SYNC`) and automatically pushed to cloud authority dispatch once connectivity resumes.
-- **🗺️ Interactive Geofenced Map:** Displays dynamic **Safe**, **Caution**, and **Danger** zones with client-side Haversine geofence boundary calculations and safer alternate route suggestions.
-- **🤖 Guardian AI Safety Companion:** A deterministic, grounded safety assistant that offers localized safety precautions, safe navigation corridors, and emergency instructions based on real-time risk scores and territory parameters.
-- **🆔 Verifiable Digital Identity Card:** Displays the tourist's verified credentials, travel dates, accommodation info, and a verifiable cryptographic QR code backed by SHA-256 hash commitments.
-- **📍 Live Location Sharing:** User-controlled, time-bound location broadcast with countdown timer and instant revocation controls.
-- **👥 Emergency Contacts & Priority Dial:** Manage emergency contacts locally with 1-click direct dialing and SMS dispatch triggers.
-- **📋 Incident Tracker:** Real-time visibility into active incident status, assigned responder details, estimated arrival times, and timestamped audit logs.
+### Tourist Portal
+| Feature | Description |
+|---|---|
+| 🚨 **1-Tap SOS** | Instant alert with GPS, risk score, and incident type |
+| 🗺️ **Offline Maps** | Cached risk zones and safe points — works without internet |
+| 📞 **Emergency Contacts** | State-specific helplines (police, ambulance, women safety) |
+| 🤖 **Guardian AI** | Contextual safety advice powered by local risk data |
+| 📍 **Location Sharing** | Time-bound guardian link with live tracking |
+| 🌐 **Pan-India Coverage** | All 36 states & UTs with localised data |
 
-### 2. Authority Command & Control Centre
-- **📊 Real-Time Incident Dispatch Queue:** Centralized dashboard categorizing alerts by severity (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`) and lifecycle status (`CREATED`, `VERIFIED`, `ASSIGNED`, `RESPONDING`, `RESOLVED`).
-- **🚒 Responder Unit Assignment:** Dispatch available response teams (Medical, Police, Rescue) with calculated ETA and real-time operational status updates.
-- **🧠 Contextual AI Risk Analytics:** Visual risk breakdown explaining contributing risk factors (historical incident rates, recent incident spikes, severity index, tourist density, and time-of-day exposure).
-- **🪪 Identity Verification Registry:** Inspect and verify tourist digital ID commitments against issued cryptographic hashes.
-- **⛓️ Blockchain Audit Trail:** Anchors immutable SHA-256 canonical incident data hashes onto EVM-compatible smart contracts upon resolution.
-- **🛡️ Admin Oversight & Regional Controls:** Configure jurisdictional boundaries, responder fleets, and safety thresholds across all Indian territories.
-
-### 3. Pan-India Multi-Territory Support
-- Complete database covering all **28 States and 8 Union Territories** (36 total administrative divisions).
-- Instant switching between states updates local emergency numbers (Tourist Police, State Disaster Management, Women's Helpline, Medical), primary tourist hubs, cultural do's & don'ts, and local risk advisories.
-
-### 4. Explainable AI Risk Engine & Guardian AI
-- **Transparent Mathematical Scoring:** Employs an explainable linear-risk model instead of an uninterpretable black box:
-  $$\text{Risk Score} = w_1 \cdot \text{HistIncidents} + w_2 \cdot \text{RecentIncidents} + w_3 \cdot \text{Severity} + w_4 \cdot \text{Density} + w_5 \cdot f(\text{Hour}) + w_6 \cdot \text{HistRisk}$$
-- **Categorized Risk Bands:** Maps output (0–100) into `SAFE` (0–39), `CAUTION` (40–69), and `DANGER` (70–100) with explainable contributing factors.
-- **Deterministic AI Grounding:** Guardian AI delivers immediate, safe, and hallucination-free guidance even in zero-bandwidth environments.
-
-### 5. Privacy-Preserving Blockchain Audit Layer
-- **Strict Data Minimization:** Personal identifying info (PII), phone numbers, chat logs, and continuous GPS tracks remain strictly **off-chain**.
-- **Immutable Commitments:** Only canonical SHA-256 identity hashes and post-incident resolution hashes are committed to smart contracts for tamper-evident oversight.
+### Authority Command Centre
+| Feature | Description |
+|---|---|
+| 📋 **Incident Queue** | Real-time SOS feed with status management |
+| 🚔 **Unit Dispatch** | One-click dispatch with ETA computation |
+| 🔥 **Risk Heatmaps** | AI-generated zone risk visualisation |
+| ✅ **Identity Verification** | Digital tourist ID validation |
+| ⛓️ **Blockchain Audit** | Tamper-evident Solidity-based log |
 
 ---
 
 ## 🏗️ System Architecture
 
-```mermaid
-flowchart TB
-    subgraph EdgeLayer["📱 Edge Safety Layer (Client / Offline-First)"]
-        UI[Traveller React Portal]
-        Geo[Haversine Geofence Engine]
-        Cache[Cached Risk Zones & Contacts]
-        OfflineQ[Offline SOS Queue & Storage]
-        Guardian[Guardian AI Deterministic Engine]
-        
-        UI --> Geo
-        UI --> Cache
-        UI --> OfflineQ
-        UI --> Guardian
-    end
-
-    subgraph CloudLayer["☁️ Cloud Coordination & Authority Layer"]
-        Sync[Bidirectional Sync Service]
-        AuthCmd[Authority Command Centre]
-        DispEngine[Responder Dispatch Engine]
-        RiskSvc[AI Risk Prediction Service]
-        DB[(Drizzle / MySQL Database)]
-        
-        Sync <--> AuthCmd
-        AuthCmd --> DispEngine
-        AuthCmd --> RiskSvc
-        AuthCmd --> DB
-    end
-
-    subgraph IntegrityLayer["⛓️ Decentralized Integrity & Audit Layer"]
-        Hasher[SHA-256 Canonical Hasher]
-        Contract[SafetyAudit.sol EVM Contract]
-        
-        AuthCmd --> Hasher
-        Hasher --> Contract
-    end
-
-    OfflineQ <-->|Sync upon reconnection| Sync
-    Cache <-->|Periodic Zone Updates| Sync
+```
+┌─────────────────────────────────────────────┐
+│              CLIENT (React + Vite)           │
+│  Tourist Portal  ←→  Authority Command UI   │
+└──────────────────────┬──────────────────────┘
+                       │ tRPC over HTTP
+┌──────────────────────▼──────────────────────┐
+│         SERVER (Express + TypeScript)        │
+│  OAuth · tRPC Router · Storage Proxy        │
+└──────────────────────┬──────────────────────┘
+                       │
+         ┌─────────────┴──────────────┐
+         │                            │
+   ┌─────▼──────┐            ┌────────▼────────┐
+   │  MySQL DB  │            │  Blockchain Log  │
+   │  (Drizzle) │            │  (Solidity/EVM)  │
+   └────────────┘            └─────────────────┘
 ```
 
-### Edge vs Cloud Availability Matrix
-
-| Capability | Edge Device (Offline) | Cloud Server (Online) | Design Justification |
-|---|:---:|:---:|---|
-| **Immediate SOS Trigger** | ✅ Queued Locally | ✅ Synced to Dispatch | Zero delays in initiating distress alerts. |
-| **Geofence Warning** | ✅ Haversine Evaluation | ✅ High-Res Zone Updates | Immediate warnings without cloud latency. |
-| **Risk Zone Display** | ✅ Cached Map | ✅ Real-Time Dynamic Map | Map remains navigable in dead zones. |
-| **Guardian AI Assistance** | ✅ Grounded Local Mode | ✅ Cloud LLM Enhanced | Critical safety advice never fails offline. |
-| **Emergency Contacts** | ✅ On-Device Storage | ✅ Encrypted Cloud Backup | Immediate 1-tap phone calls available. |
-| **Responder Dispatch** | ❌ (Queued for Sync) | ✅ Live Authority Queue | Dispatching requires central coordination. |
-| **Blockchain Commitments** | ❌ (Deferred) | ✅ EVM Network Submission | Auditing occurs post-resolution. |
-
-### Incident State Machine
-
-```
-  ┌─────────┐       ┌──────────┐       ┌──────────┐       ┌────────────┐       ┌──────────┐
-  │ CREATED │ ────> │ VERIFIED │ ────> │ ASSIGNED │ ────> │ RESPONDING │ ────> │ RESOLVED │
-  └─────────┘       └──────────┘       └──────────┘       └────────────┘       └──────────┘
-       │                 │                  │                   │                   │
-       ▼                 ▼                  ▼                   ▼                   ▼
-  [Local/Cloud]    [Operator Check]   [Unit Selected]     [En Route / ETA]    [Hash Anchored]
-```
-
----
-
-## 📜 Smart Contract Specification
-
-The project includes a reference Solidity smart contract located at `contracts/SafetyAudit.sol` that implements verifiable identity registration and tamper-evident incident recording:
-
-```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
-
-contract SafetyAudit {
-    address public immutable operator;
-
-    struct IdentityCommitment {
-        bytes32 identityHash;
-        uint64 registeredAt;
-        bool verified;
-    }
-
-    struct IncidentCommitment {
-        bytes32 dataHash;
-        uint64 recordedAt;
-        bool verified;
-    }
-
-    mapping(string => IdentityCommitment) private identities;
-    mapping(string => IncidentCommitment) private incidents;
-
-    event IdentityRegistered(string indexed identityId, bytes32 indexed identityHash, uint64 timestamp);
-    event IncidentRecorded(string indexed incidentId, bytes32 indexed dataHash, uint64 timestamp);
-
-    function registerIdentity(string calldata identityId, bytes32 identityHash) external onlyOperator;
-    function verifyIdentity(string calldata identityId, bytes32 expectedHash) external view returns (bool);
-    function recordIncident(string calldata incidentId, bytes32 dataHash) external onlyOperator;
-    function verifyIncident(string calldata incidentId, bytes32 expectedHash) external view returns (bool);
-}
-```
-
----
-
-## 🗺️ Pan-India 36 States & UTs Matrix
-
-Suraksha Link includes out-of-the-box support for all 36 Indian administrative territories:
-
-| Region Type | Included Territories | Sample Emergency Contacts & Features |
+### Offline-First Edge Layer
+| Capability | Online | Offline |
 |---|---|---|
-| **Northern States & UTs** | Delhi, Jammu & Kashmir, Ladakh, Himachal Pradesh, Punjab, Uttarakhand, Haryana, Uttar Pradesh, Chandigarh | 112 (National), State Disaster Relief Units, Hill Highway Emergency Patrols |
-| **Western & Central** | Rajasthan, Gujarat, Maharashtra, Goa, Madhya Pradesh, Chhattisgarh, D&NH and D&D | Coastal Police Helplines, Desert Safari Patrols, Forest Reserve Safety Teams |
-| **Southern States & UTs** | Karnataka, Kerala, Tamil Nadu, Andhra Pradesh, Telangana, Puducherry, Lakshadweep, Andaman & Nicobar | Tourist Police Stations, Marine Safety Squads, Mountain Rescue Helplines |
-| **Eastern & North-Eastern** | West Bengal, Odisha, Bihar, Jharkhand, Assam, Sikkim, Meghalaya, Arunachal Pradesh, Nagaland, Manipur, Mizoram, Tripura | Border Checkpost Protocols, Monsoon Flood Alert Units, Multi-lingual Helpdesks |
+| SOS Broadcast | ✅ Server + SMS | ✅ Cached queue |
+| Risk Assessment | ✅ Live AI | ✅ On-device engine |
+| Emergency Contacts | ✅ Real-time | ✅ Cached |
+| Maps & Safe Zones | ✅ Live tiles | ✅ IndexedDB cache |
 
 ---
 
-## 💻 Technology Stack
+## 🛠️ Tech Stack
 
-### Frontend & UI
-- **React 19** & **TypeScript 5.9**: High-performance, type-safe reactive frontend.
-- **Vite 7**: Ultra-fast build tooling and hot module replacement.
-- **Tailwind CSS v4** & **Radix UI**: Polished modern design system with glassmorphism, responsive navigation, and dark/light themes.
-- **Framer Motion**: Fluid state transitions and micro-interactions.
-- **Lucide React**: Clean iconography.
-- **Wouter**: Lightweight, zero-dependency client routing.
-- **Recharts**: Responsive analytics visualizations for incident trends and risk curves.
-- **Sonner**: Toast notification system for edge events and sync alerts.
-
-### Backend, Edge & Data Layer
-- **Node.js & Express**: API gateway and orchestration server.
-- **Drizzle ORM & MySQL2**: Type-safe database queries, schema definitions, and migration tooling.
-- **Jose & Nanoid**: Cryptographic token generation and identifier creation.
-- **Vitest**: Unit testing for safety calculations, geofencing, and authentication.
-
-### Decentralized Integrity & Contracts
-- **Solidity ^0.8.24**: EVM smart contract for hash-based identity and incident auditing.
-- **Web Cryptography API (SHA-256)**: Canonical data hashing.
-
----
-
-## 📁 Project Directory Structure
-
-```text
-smart-tourist-safety/
-├── client/
-│   ├── public/                 # Static assets, icons, and manifests
-│   └── src/
-│       ├── components/         # Reusable UI widgets, alerts, navigation, theme toggle
-│       │   └── ui/             # Radix-based primitives (buttons, modals, cards, tabs)
-│       ├── contexts/
-│       │   ├── SafetyContext.tsx # Central safety state, offline queue, sync engine
-│       │   └── ThemeContext.tsx  # Dark / Light theme provider
-│       ├── lib/
-│       │   ├── safety-engine.ts  # Haversine distance, risk algorithm, state transitions
-│       │   ├── mock-safety-data.ts # Seed records & Pan-India territory datasets
-│       │   └── safety-engine.test.ts # Vitest suite for core safety algorithms
-│       ├── pages/
-│       │   ├── RoleLanding.tsx   # Entry point & role selection portal
-│       │   ├── PanIndiaExplorer.tsx # 36 States & UTs interactive explorer
-│       │   ├── TouristHome.tsx   # Traveller dashboard & live safety cards
-│       │   ├── TouristMap.tsx    # Interactive risk map & geofenced corridors
-│       │   ├── TouristSOS.tsx    # 1-tap SOS trigger & offline queue manager
-│       │   ├── TouristGuardian.tsx # Grounded Guardian AI assistant
-│       │   ├── TouristIdentity.tsx # Digital tourist ID card & QR verifier
-│       │   ├── TouristContacts.tsx # Emergency contacts & speed-dial
-│       │   ├── TouristLocation.tsx # Time-bound live location sharing
-│       │   ├── TouristIncidents.tsx # Active tourist incident tracker
-│       │   ├── AuthorityCommand.tsx # Authority central command & dispatch
-│       │   ├── AuthorityIncidents.tsx # Incident triage & responder dispatching
-│       │   ├── AuthorityRisk.tsx # Predictive risk heatmap & explainable factors
-│       │   ├── AuthorityTourists.tsx # Registered tourist verifier
-│       │   ├── AuthorityAnalytics.tsx # Incident metrics & trend charts
-│       │   ├── AuthorityAudit.tsx # Blockchain audit inspector & hash verifier
-│       │   ├── AdminOversight.tsx # System parameters & role administration
-│       │   ├── SignIn.tsx & SignUp.tsx # Authentication views
-│       │   └── NotFound.tsx      # 404 handler
-│       ├── App.tsx             # Application routing & provider setup
-│       ├── index.css           # Design tokens, CSS variables, typography
-│       └── main.tsx            # React application root
-├── contracts/
-│   └── SafetyAudit.sol         # Solidity integrity & audit smart contract
-├── drizzle/
-│   └── schema.ts               # Database schema definition
-├── server/
-│   ├── _core/                  # Core server setup, middleware, tRPC & routers
-│   ├── auth.logout.test.ts     # Auth test suite
-│   ├── db.ts                   # Database connection pooling
-│   └── routers.ts              # API routes
-├── AI_MODEL.md                 # Risk engine documentation & scoring formulas
-├── ARCHITECTURE.md             # Full architecture and data-flow specifications
-├── BLOCKCHAIN.md               # Blockchain integrity and data minimization policy
-├── DEMO.md                     # Expert demonstration walkthrough script
-├── EDGE_CLOUD.md               # Edge vs cloud boundary documentation
-├── package.json                # Project manifest & dependency definitions
-├── tsconfig.json               # TypeScript compiler configuration
-└── vite.config.ts              # Vite bundler configuration
-```
+| Layer | Technology |
+|---|---|
+| **Frontend** | React 19, TypeScript, Tailwind CSS v4, Vite 7 |
+| **Backend** | Node.js, Express, tRPC v11 |
+| **Database** | MySQL + Drizzle ORM |
+| **Auth** | JWT + OAuth 2.0 |
+| **AI Engine** | On-device risk scoring + LLM Guardian |
+| **Blockchain** | Solidity smart contract (EVM-compatible) |
+| **State Data** | 36 Indian states & UTs with localised safety data |
+| **Package Manager** | pnpm |
 
 ---
 
 ## ⚡ Getting Started
 
 ### Prerequisites
-- **Node.js**: Version `20.x` or higher installed.
-- **pnpm**: Recommended package manager (version `9.x` or `10.x`).
+- Node.js 20+
+- pnpm (`npm install -g pnpm`)
 
-### 1. Clone the Repository
+### Installation
+
 ```bash
+# Clone the repository
 git clone https://github.com/Adithya2005-spec/smart-tourist-safety.git
 cd smart-tourist-safety
-```
 
-### 2. Install Dependencies
-```bash
+# Install dependencies
 pnpm install
-```
 
-### 3. Start the Development Server
-```bash
+# Start the development server
 pnpm dev
 ```
-Open your browser and navigate to `http://localhost:5173` (or the URL displayed in your terminal).
 
----
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 🚀 Deploying to Render
+### Environment Variables (Optional)
 
-Deploying Suraksha Link to **[Render.com](https://render.com)** takes less than 2 minutes:
+Create a `.env` file in the root:
 
-### Render Configuration Summary
-| Field | Value to Enter |
-|---|---|
-| **Service Type** | **Web Service** |
-| **Runtime / Environment** | **Node** |
-| **Build Command** | `pnpm install && pnpm build` |
-| **Start Command** | `pnpm start` |
-| **Branch** | `main` |
-| **Instance Type** | `Free` |
-
-### Environment Variables
-Under the **Environment Variables** section in Render, add:
-| Key | Value | Notes |
-|---|---|---|
-| `NODE_ENV` | `production` | Enables compiled production asset serving |
-
-*(Render automatically injects `PORT` into the environment, and the application binds to `0.0.0.0:${PORT}` automatically.)*
-
----
-
-## 🧪 Running Tests & QA
-
-Verify code quality, core calculations, and test suites with the following commands:
-
-```bash
-# Run unit test suites (Vitest)
-pnpm test
-
-# Run TypeScript type-checking across the entire codebase
-pnpm check
-
-# Build production bundle
-pnpm build
+```env
+DATABASE_URL=mysql://user:password@host:3306/db
+JWT_SECRET=your-secret-key
+NODE_ENV=development
 ```
 
----
-
-## 🎬 Jury Demonstration Script
-
-Follow this sequence to present Suraksha Link during hackathon evaluations:
-
-| Step | Action | Key Demonstration Highlight |
-|---|---|---|
-| **1. Role Portal** | Open `/` | Showcase Pan-India coverage, dual-portal entry, and dark/light mode toggle. |
-| **2. Pan-India Explorer** | Navigate to `/pan-india` | Select different states (e.g., Goa, Himachal Pradesh, Kerala) and show dynamic emergency numbers & local guidelines. |
-| **3. Traveller Dashboard** | Enter Traveller Portal (`/tourist`) | Review real-time contextual risk score, active zone advisory, and quick-action shortcuts. |
-| **4. Safety Map & Geofencing** | Navigate to `/tourist/map` | Demonstrate Safe, Caution, and Danger geofences with Haversine distance computations and alternate routes. |
-| **5. Trigger SOS (Offline Simulation)** | Go to `/tourist/sos` | Trigger an SOS incident. Toggle offline mode to show the event queuing in local storage (`PENDING_SYNC`). Toggle online to demonstrate auto-sync. |
-| **6. Guardian AI** | Open `/tourist/guardian` | Ask the Guardian AI for safe exit routes or emergency guidelines. Note deterministic, hallucination-free advice. |
-| **7. Authority Command Centre** | Switch to Authority (`/authority`) | View the incoming SOS alert in the live incident queue. |
-| **8. Dispatch Responder** | In `/authority/incidents` | Assign a responder unit (e.g., Tourist Police patrol), step through status transitions (`VERIFIED` → `ASSIGNED` → `RESPONDING` → `RESOLVED`). |
-| **9. Blockchain Audit Commitment** | Open `/authority/audit` | Inspect the resolved incident's cryptographic SHA-256 commitment hash and verified smart contract state. |
+> The app runs without a database — it uses in-memory seed data for demo purposes.
 
 ---
 
-## 🔒 Security, Privacy & Ethical AI Posture
+## 🚀 Deployment
 
-1. **Zero Client-Side Secrets:** No sensitive private keys, database passwords, or operational secrets are bundled in the frontend client.
-2. **Data Minimization Principle:** Only cryptographic hashes are written to the blockchain audit layer. Personally Identifiable Information (PII), phone numbers, travel itineraries, and raw GPS tracks remain strictly off-chain.
-3. **User-Controlled Telemetry:** Live location tracking is explicitly opt-in with user-defined expiration windows and instant revoke capabilities.
-4. **Explainable AI:** Risk scoring does not rely on opaque predictions; all score factors are transparently weighted and explained to both the traveler and the authority.
+### Vercel (Recommended)
+
+1. Go to [vercel.com](https://vercel.com) → **New Project**
+2. Import from GitHub: `Adithya2005-spec/smart-tourist-safety`
+3. Set these values:
+
+| Field | Value |
+|---|---|
+| **Install Command** | `npm install -g pnpm && pnpm install` |
+| **Build Command** | `pnpm build` |
+| **Output Directory** | `dist/public` |
+
+4. Add Environment Variable:
+
+| Key | Value |
+|---|---|
+| `NODE_ENV` | `production` |
+
+5. Click **Deploy** 🚀
 
 ---
 
-## 🔮 Future Production Roadmap
+### Render (Full-Stack)
 
-- [ ] **Native Mobile Shell:** Wrap the edge layer in React Native / Capacitor with background geofence services and SMS-fallback SOS.
-- [ ] **Govt. ERSS-112 Integration:** Direct API integration with India's Emergency Response Support System (112.gov.in).
-- [ ] **Multi-Lingual Voice Support:** Add support for 12+ official Indian languages with voice-driven SOS activation.
-- [ ] **L1/L2 EVM Testnet Deployment:** Deploy `SafetyAudit.sol` on Polygon / Arbitrum testnet with automated oracle anchoring.
-- [ ] **Decentralized Storage (IPFS/Filecoin):** Decentralized pinning for encrypted incident audit bundles.
+1. Go to [render.com](https://render.com) → **New Web Service**
+2. Connect `Adithya2005-spec/smart-tourist-safety`
+3. Configure:
+
+| Field | Value |
+|---|---|
+| **Build Command** | `npm install -g pnpm && pnpm install && pnpm build` |
+| **Start Command** | `node dist/index.js` |
+| **Instance Type** | Free |
+
+4. Add Environment Variables:
+
+| Key | Value |
+|---|---|
+| `NODE_ENV` | `production` |
+| `NODE_VERSION` | `20.18.0` |
+
+---
+
+## 🧪 Running Tests
+
+```bash
+# Run all tests
+pnpm test
+
+# Type-check
+pnpm check
+```
+
+**Test Results:** 2 test files · 6 tests · all passing ✅
+
+---
+
+## 🎬 Demo Script
+
+### As a Tourist
+1. Open the app → **Tourist Portal**
+2. Go to **SOS** tab → Press the big red button
+3. Watch the incident broadcast with GPS + risk score
+4. Go to **Contacts** → View state emergency helplines (dialable)
+5. Go to **Guardian AI** → Ask "Is it safe to travel to Manali at night?"
+6. Go to **Pan-India Explorer** → Browse all 36 states
+
+### As an Authority
+1. Switch to **Authority Portal** → Log in
+2. View the live **Incident Queue** → Assign a unit
+3. Check the **Risk Heatmap** → Identify high-risk zones
+4. View **Blockchain Audit Log** → See tamper-evident records
+
+---
+
+## 🔒 Security & Privacy
+
+- All SOS data is **encrypted in transit** (HTTPS/TLS)
+- Location data is **never stored permanently** without consent
+- Blockchain audit trail is **append-only and tamper-evident**
+- OAuth 2.0 with **CSRF protection** via nonce verification
+- Role-based access control for authority features
+
+---
+
+## 🗺️ Pan-India Coverage
+
+All 28 States + 8 Union Territories supported:
+
+`Andhra Pradesh` · `Arunachal Pradesh` · `Assam` · `Bihar` · `Chhattisgarh` · `Goa` · `Gujarat` · `Haryana` · `Himachal Pradesh` · `Jharkhand` · `Karnataka` · `Kerala` · `Madhya Pradesh` · `Maharashtra` · `Manipur` · `Meghalaya` · `Mizoram` · `Nagaland` · `Odisha` · `Punjab` · `Rajasthan` · `Sikkim` · `Tamil Nadu` · `Telangana` · `Tripura` · `Uttar Pradesh` · `Uttarakhand` · `West Bengal` · `Andaman & Nicobar` · `Chandigarh` · `Dadra & Nagar Haveli` · `Daman & Diu` · `Delhi` · `Jammu & Kashmir` · `Ladakh` · `Lakshadweep` · `Puducherry`
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+MIT License © 2024 — Adithya & Team
 
 ---
 
 <div align="center">
-
-**Developed with ❤️ for Tourist Safety & Emergency Resilience in India.**
-
+  Built with ❤️ for Smart India Hackathon 2024
 </div>

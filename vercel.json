@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "buildCommand": "npm install -g pnpm && pnpm install && pnpm build",
+  "outputDirectory": "dist/public",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
