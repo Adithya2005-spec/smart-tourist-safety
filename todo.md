@@ -1,0 +1,21 @@
+# Project TODO
+
+- [x] Establish a polished, responsive application shell with role switcher and clear tourist versus authority navigation.
+- [x] Implement the tourist safety home view with real-time safety status, connectivity state, nearby alert context, and priority actions.
+- [x] Implement a digital identity card with QR code, travel profile, and emergency-contact registration.
+- [x] Implement SOS initiation with incident-type selection, one-tap reporting, local queueing, and status tracking.
+- [x] Implement an interactive safety-map experience with a no-key fallback map, location marker, safety zones, incident pins, facilities, and safer-route guidance.
+- [x] Implement actual Haversine geofence evaluation with a controlled high-risk simulation that uses the same alert flow.
+- [x] Implement transparent synthetic-data risk prediction with zone scores, colour-coded heat indicators, factors, and service abstraction.
+- [x] Implement a deterministic context-aware Guardian AI chat for safety questions, nearby safe zones, and emergency procedures.
+- [x] Implement emergency contacts, controlled live-location sharing, and offline-first local persistence indicators.
+- [x] Implement the authority command centre with an incident feed, alert queue, zone-risk panel, map context, and responder assignment workflow.
+- [x] Implement incident lifecycle actions for create, acknowledge, dispatch, resolve, and timestamped audit records.
+- [x] Implement role-based access separation for tourist, authority, and administrator views in the prototype.
+- [x] Create reusable mock data and local service abstractions so all flows remain navigable without a live backend connection.
+- [x] Add unit tests for safety geofencing, risk prediction, lifecycle transitions, and audit-chain validation.
+- [x] Verify responsive visual quality and interactive flows, correct issues, and update this inventory.
+- [ ] Write concise local setup and architecture documentation, then package the complete repository as a ZIP.
+- [x] Correct offline SOS queue semantics so pending incidents remain authority-invisible until synchronization and clear pending markers after sync.
+- [x] Add an administrator-specific route and UI boundary separate from authority operations.
+- [x] Refactor synthetic risk scoring behind an explicit RiskPredictionService boundary.
