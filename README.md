@@ -315,7 +315,29 @@ pnpm dev
 ```
 Open your browser and navigate to `http://localhost:5173` (or the URL displayed in your terminal).
 
-> 💡 **Zero Setup Required:** No external database, Google Maps API key, OpenAI API key, or live blockchain RPC is mandatory to test the prototype. All services run out-of-the-box using deterministic edge simulations and mock seed data.
+---
+
+## 🚀 Deploying to Render
+
+Deploying Suraksha Link to **[Render.com](https://render.com)** takes less than 2 minutes:
+
+### Render Configuration Summary
+| Field | Value to Enter |
+|---|---|
+| **Service Type** | **Web Service** |
+| **Runtime / Environment** | **Node** |
+| **Build Command** | `pnpm install && pnpm build` |
+| **Start Command** | `pnpm start` |
+| **Branch** | `main` |
+| **Instance Type** | `Free` |
+
+### Environment Variables
+Under the **Environment Variables** section in Render, add:
+| Key | Value | Notes |
+|---|---|---|
+| `NODE_ENV` | `production` | Enables compiled production asset serving |
+
+*(Render automatically injects `PORT` into the environment, and the application binds to `0.0.0.0:${PORT}` automatically.)*
 
 ---
 
