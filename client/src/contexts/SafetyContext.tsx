@@ -136,8 +136,8 @@ function seedState(): Persisted {
     contacts: [
       ...seedContacts,
       { id: "STATE-POLICE", name: `${defaultStateObj.name} Tourist Police`, phone: defaultStateObj.emergency.touristPolice, relationship: "Official Helpline", primary: true },
-      { id: "STATE-EMERGENCY", name: "National Emergency Service (India)", phone: "112", relationship: "Central Police/Fire/Medical", primary: true },
-      { id: "STATE-WOMEN", name: "Women Safety Helpline (India)", phone: defaultStateObj.emergency.womenHelpline, relationship: "Women Safeguard Desk", primary: false },
+      { id: "STATE-EMERGENCY", name: "National Emergency SOS (Demo)", phone: defaultStateObj.emergency.police, relationship: "Central Police/Fire/Medical", primary: true },
+      { id: "STATE-WOMEN", name: "Women Safety Helpline (Demo)", phone: defaultStateObj.emergency.womenHelpline, relationship: "Women Safeguard Desk", primary: false },
     ],
     location: defaultStateObj.defaultLocation,
     locationName: defaultStateObj.defaultLocationName,
@@ -210,8 +210,8 @@ export function SafetyProvider({ children }: { children: React.ReactNode }) {
 
     const stateContacts: EmergencyContact[] = [
       { id: "STATE-POLICE", name: `${targetState.name} Tourist Police`, phone: targetState.emergency.touristPolice, relationship: "Official Helpline", primary: true },
-      { id: "STATE-EMERGENCY", name: "National Emergency Service (India)", phone: "112", relationship: "Central Police/Fire/Medical", primary: true },
-      { id: "STATE-WOMEN", name: "Women Safety Helpline", phone: targetState.emergency.womenHelpline, relationship: "Women Safeguard Desk", primary: false },
+      { id: "STATE-EMERGENCY", name: "National Emergency SOS (Demo)", phone: targetState.emergency.police, relationship: "Central Police/Fire/Medical", primary: true },
+      { id: "STATE-WOMEN", name: "Women Safety Helpline (Demo)", phone: targetState.emergency.womenHelpline, relationship: "Women Safeguard Desk", primary: false },
       { id: "STATE-AMBULANCE", name: `${targetState.name} Medical First Aid`, phone: targetState.emergency.ambulance, relationship: "Ambulance Network", primary: false },
     ];
 

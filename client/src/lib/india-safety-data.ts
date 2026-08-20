@@ -53,7 +53,7 @@ export interface IndianStateData {
   language: string;
 }
 
-export const allIndianStates: IndianStateData[] = [
+const RAW_STATES: IndianStateData[] = [
   {
     id: "KA",
     name: "Karnataka",
@@ -1103,6 +1103,26 @@ export const allIndianStates: IndianStateData[] = [
     weatherAlert: "Cool sea breeze along the French promenade",
   },
 ];
+
+export const allIndianStates: IndianStateData[] = RAW_STATES.map((state, idx) => {
+  const padIndex = String(idx + 1).padStart(2, "0");
+  return {
+    ...state,
+    emergency: {
+      police: "+91 98765 00112",
+      touristPolice: `+91 98765 100${padIndex}`,
+      womenHelpline: "+91 98765 01091",
+      ambulance: "+91 98765 00108",
+      disasterManagement: "+91 98765 01070",
+      highwayPatrol: "+91 98765 01033",
+      fireService: "+91 98765 00101",
+    },
+    safePoints: state.safePoints.map((sp, spIdx) => ({
+      ...sp,
+      phone: `+91 98765 20${padIndex}${spIdx + 1}`,
+    })),
+  };
+});
 
 export function getStateById(idOrCode: string): IndianStateData | undefined {
   const upper = idOrCode.toUpperCase().trim();

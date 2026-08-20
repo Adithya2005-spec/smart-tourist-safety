@@ -130,7 +130,7 @@ export default function TouristContacts() {
                 </div>
 
                 <a
-                  href={`tel:${contact.phone.replace(/\s/g, "")}`}
+                  href={`tel:${contact.phone.replace(/[^0-9+]/g, "")}`}
                   className="inline-flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 px-3.5 py-2 text-xs font-bold text-cyan-800 dark:text-cyan-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
                 >
                   <Phone className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />

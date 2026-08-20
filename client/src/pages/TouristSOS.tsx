@@ -82,20 +82,20 @@ export default function TouristSOS() {
                 </span>
               </div>
               <p className="text-xs text-rose-900 dark:text-rose-300 mt-1">
-                Central Police: <strong>112</strong> · {activeState.name} Tourist Police: <strong>{activeState.emergency.touristPolice}</strong> · Women Helpline: <strong>{activeState.emergency.womenHelpline}</strong>
+                Central SOS: <strong>{activeState.emergency.police}</strong> · {activeState.name} Tourist Police: <strong>{activeState.emergency.touristPolice}</strong> · Women Helpline: <strong>{activeState.emergency.womenHelpline}</strong>
               </p>
             </div>
 
             <div className="flex items-center gap-2">
               <a
-                href="tel:112"
+                href={`tel:${activeState.emergency.police.replace(/[^0-9+]/g, "")}`}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white hover:bg-rose-700 shadow-md transition"
               >
                 <PhoneCall className="h-4 w-4" />
-                Call 112
+                Call SOS ({activeState.emergency.police})
               </a>
               <a
-                href={`tel:${activeState.emergency.touristPolice.replace(/\s/g, "")}`}
+                href={`tel:${activeState.emergency.touristPolice.replace(/[^0-9+]/g, "")}`}
                 className="inline-flex items-center gap-1.5 rounded-xl border border-rose-300 dark:border-rose-700 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs font-bold text-rose-800 dark:text-rose-300 hover:bg-rose-50"
               >
                 <Shield className="h-4 w-4" />
