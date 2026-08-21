@@ -3,7 +3,7 @@
 <div align="center">
 
 ![Status](https://img.shields.io/badge/Status-Live%20Prototype-success?style=for-the-badge\&logoColor=white)
-![Hackathon](https://img.shields.io/badge/Smart%20India%20Hackathon-2024-blue?style=for-the-badge)
+![Hackathon](https://img.shields.io/badge/Smart%20India%20Hackathon-2026-blue?style=for-the-badge)
 ![Coverage](https://img.shields.io/badge/Coverage-36%20States%20%2B%20UTs-orange?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey?style=for-the-badge)
 
