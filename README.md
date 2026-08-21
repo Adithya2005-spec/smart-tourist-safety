@@ -198,7 +198,7 @@ All 28 States + 8 Union Territories supported:
 
 ## 📄 License
 
-MIT License © 2024 — Adithya & Team
+MIT License © 2026 — Adithya & Team
 
 ---
 
