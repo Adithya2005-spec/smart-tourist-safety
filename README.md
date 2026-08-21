@@ -11,7 +11,7 @@
 
 **An offline-first tourist safety platform with real-time SOS, AI risk assessment, authority command centre, and blockchain-anchored audit trail.**
 
-[Features](#-features) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [Deploy](#-deployment) • [Demo Script](#-demo-script)
+[Features](#-features) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [Demo Script](#-demo-script)
 
 ---
 
@@ -24,7 +24,6 @@
 - [System Architecture](#-system-architecture)
 - [Tech Stack](#-tech-stack)
 - [Getting Started](#-getting-started)
-- [Deployment](#-deployment)
 - [Running Tests](#-running-tests)
 - [Demo Script](#-demo-script)
 - [License](#-license)
@@ -144,51 +143,6 @@ NODE_ENV=development
 ```
 
 > The app runs without a database — it uses in-memory seed data for demo purposes.
-
----
-
-## 🚀 Deployment
-
-### Vercel (Recommended)
-
-1. Go to [vercel.com](https://vercel.com) → **New Project**
-2. Import from GitHub: `Adithya2005-spec/smart-tourist-safety`
-3. Set these values:
-
-| Field | Value |
-|---|---|
-| **Install Command** | `npm install -g pnpm && pnpm install` |
-| **Build Command** | `pnpm build` |
-| **Output Directory** | `dist/public` |
-
-4. Add Environment Variable:
-
-| Key | Value |
-|---|---|
-| `NODE_ENV` | `production` |
-
-5. Click **Deploy** 🚀
-
----
-
-### Render (Full-Stack)
-
-1. Go to [render.com](https://render.com) → **New Web Service**
-2. Connect `Adithya2005-spec/smart-tourist-safety`
-3. Configure:
-
-| Field | Value |
-|---|---|
-| **Build Command** | `npm install -g pnpm && pnpm install && pnpm build` |
-| **Start Command** | `node dist/index.js` |
-| **Instance Type** | Free |
-
-4. Add Environment Variables:
-
-| Key | Value |
-|---|---|
-| `NODE_ENV` | `production` |
-| `NODE_VERSION` | `20.18.0` |
 
 ---
 
