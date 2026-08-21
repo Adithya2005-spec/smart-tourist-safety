@@ -203,5 +203,5 @@ MIT License © 2024 — Adithya & Team
 ---
 
 <div align="center">
-  Built with ❤️ for Smart India Hackathon 2024
+  Built with ❤️ for Smart India Hackathon 2026
 </div>
