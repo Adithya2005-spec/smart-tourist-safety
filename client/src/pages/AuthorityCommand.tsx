@@ -1,7 +1,14 @@
 import { AuthorityAccessDenied, useAuthorityAccess } from "@/components/AuthorityAccess";
+import { ChaosSimulatorPanel } from "@/components/ChaosSimulatorPanel";
 import { DemoSafetyMap } from "@/components/DemoSafetyMap";
+import { HitlDecisionModal } from "@/components/HitlDecisionModal";
+import { IncidentEvidenceGraphView } from "@/components/IncidentEvidenceGraph";
+import { IncidentReplayPlayer } from "@/components/IncidentReplayPlayer";
+import { PostIncidentForensicsView } from "@/components/PostIncidentForensicsView";
 import { RiskBadge, SafetyShell } from "@/components/SafetyShell";
+import { ZoneScorecard } from "@/components/ZoneScorecard";
 import { useSafety } from "@/contexts/SafetyContext";
+import type { HitlRecommendation } from "@/lib/hitl-engine";
 import {
   Activity,
   AlertTriangle,
@@ -12,23 +19,56 @@ import {
   RadioTower,
   ShieldAlert,
   UsersRound,
+  SlidersHorizontal,
+  Sparkles,
+  Map,
+  Compass,
+  CheckCircle2,
+  UserCheck,
+  Zap,
+  Play,
 } from "lucide-react";
+import { useState } from "react";
 import { Link } from "wouter";
 
 export default function AuthorityCommand() {
   const allowed = useAuthorityAccess();
-  const { incidents, zones, responders, activeState } = useSafety();
+  const {
+    incidents,
+    zones,
+    responders,
+    activeState,
+    digitalTwin,
+    simulationParams,
+    updateSimulationParams,
+    zonalCoverage,
+    prePositioningRecs,
+    getEvidenceGraph,
+    nextBestActions,
+    hitlRecommendations,
+    processHitlAction,
+    chaosState,
+    toggleChaosState,
+    resilienceResponse,
+    forensicsReport,
+    confidenceAI,
+  } = useSafety();
+
+  const [activeHitlModalRec, setActiveHitlModalRec] = useState<HitlRecommendation | null>(null);
+  const [showReplay, setShowReplay] = useState(false);
 
   if (!allowed) return <AuthorityAccessDenied />;
 
   const active = incidents.filter((incident) => incident.status !== "RESOLVED");
   const critical = active.filter((incident) => ["HIGH", "CRITICAL"].includes(incident.severity));
-  const available = responders.filter((responder) => responder.availability === "AVAILABLE");
+
+  const activeIncident = active[0] || incidents[0];
+  const evidenceGraph = activeIncident ? getEvidenceGraph(activeIncident) : null;
 
   return (
     <SafetyShell
       eyebrow="Authority command centre"
-      title={`${activeState.name} Command & Dispatch Center`}
+      title={`${activeState.name} Emergency Coordination & Decision Command`}
       actions={
         <Link
           href="/authority/incidents"
@@ -38,15 +78,136 @@ export default function AuthorityCommand() {
         </Link>
       }
     >
-      {/* Top Metrics */}
+      {/* HITL Review Modal */}
+      {activeHitlModalRec && (
+        <HitlDecisionModal
+          recommendation={activeHitlModalRec}
+          onApprove={(notes) => {
+            processHitlAction(activeHitlModalRec, "APPROVED", "AUTH-OPERATOR-01", notes);
+            setActiveHitlModalRec(null);
+          }}
+          onReject={(notes) => {
+            processHitlAction(activeHitlModalRec, "REJECTED", "AUTH-OPERATOR-01", notes);
+            setActiveHitlModalRec(null);
+          }}
+          onClose={() => setActiveHitlModalRec(null)}
+        />
+      )}
+
+      {/* Top Metrics with Confidence Badge */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric icon={ShieldAlert} label="Active Incidents" value={active.length} detail={`${activeState.name} active queue`} tone="rose" />
-        <Metric icon={AlertTriangle} label="Critical Alerts" value={critical.length} detail="High or critical severity" tone="amber" />
-        <Metric icon={Activity} label="High-Risk Zones" value={zones.filter((zone) => zone.band === "DANGER").length} detail={`Evaluated in ${activeState.name}`} tone="cyan" />
-        <Metric icon={UsersRound} label="Available Responders" value={available.length} detail={`${responders.length} total registered`} tone="green" />
+        <Metric
+          icon={ShieldAlert}
+          label="Active Incidents"
+          value={digitalTwin.activeIncidents}
+          detail={`${activeState.name} active queue`}
+          tone="rose"
+        />
+        <Metric
+          icon={AlertTriangle}
+          label="AI Model Confidence"
+          value={`${confidenceAI.confidencePercentage}% (${confidenceAI.confidenceLevel})`}
+          detail="Evaluated telemetry quality"
+          tone="amber"
+        />
+        <Metric
+          icon={Activity}
+          label="Area Resilience"
+          value={`${digitalTwin.overallResilienceScore}/100`}
+          detail={`ETA: ${digitalTwin.averageResponseTimeMinutes} mins`}
+          tone="cyan"
+        />
+        <Metric
+          icon={UsersRound}
+          label="Active Responders"
+          value={digitalTwin.activeResponders}
+          detail={`${responders.length} total registered`}
+          tone="green"
+        />
       </div>
 
-      {/* Main Operational Map & Live Incident Feed */}
+      {/* Next Best Action & HITL Decision Bar */}
+      <div className="mt-5 rounded-3xl border border-cyan-900 bg-[#082235] p-6 text-white shadow-xl space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="grid h-8 w-8 place-items-center rounded-xl bg-cyan-500 text-slate-950 font-bold">
+              <Zap className="h-5 w-5" />
+            </div>
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300">
+                NEXT BEST ACTION ENGINE [MODEL-DERIVED + HITL APPROVAL]
+              </span>
+              <h3 className="text-sm font-black text-white">Ranked Decision Recommendations</h3>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowReplay(!showReplay)}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-cyan-400/40 bg-cyan-500/10 px-3 py-1.5 text-xs font-bold text-cyan-300 hover:bg-cyan-500/20 transition"
+          >
+            <Play className="h-3.5 w-3.5" />
+            {showReplay ? "Hide Incident Replay" : "Replay Incident Lifecycle"}
+          </button>
+        </div>
+
+        {/* Next Best Action Items */}
+        <div className="grid gap-3 md:grid-cols-2">
+          {nextBestActions.map((nba) => {
+            const hitlState = hitlRecommendations.find((h) => h.recommendedAction.includes(nba.targetUnitId)) || hitlRecommendations[0];
+
+            return (
+              <div key={nba.rank} className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300">
+                    RANK #{nba.rank} · IMPACT: {nba.expectedImpact}
+                  </span>
+                  <span className="text-xs font-bold text-emerald-400">{nba.confidencePercentage}% Confidence</span>
+                </div>
+                <p className="text-sm font-black text-white">{nba.actionTitle}</p>
+                <p className="text-xs text-slate-300 leading-relaxed">{nba.reason}</p>
+
+                <div className="pt-2 flex items-center justify-between border-t border-white/10">
+                  <span className="text-[10px] font-mono text-slate-400">
+                    Status: <strong className="text-cyan-300">{hitlState.status}</strong>
+                  </span>
+                  {hitlState.status === "PENDING" ? (
+                    <button
+                      type="button"
+                      onClick={() => setActiveHitlModalRec(hitlState)}
+                      className="inline-flex items-center gap-1 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-3 py-1 text-xs font-black transition"
+                    >
+                      <UserCheck className="h-3.5 w-3.5" /> Review & Approve
+                    </button>
+                  ) : (
+                    <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Decision Logged
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Interactive Replay Player */}
+      {showReplay && (
+        <div className="mt-5">
+          <IncidentReplayPlayer />
+        </div>
+      )}
+
+      {/* Chaos Simulator Control Panel */}
+      <div className="mt-5">
+        <ChaosSimulatorPanel
+          chaosState={chaosState}
+          onToggleChaos={toggleChaosState}
+          resilience={resilienceResponse}
+        />
+      </div>
+
+      {/* Main Operational Map & Live Dispatch Feed */}
       <div className="mt-5 grid gap-5 xl:grid-cols-[1.35fr_.65fr]">
         <section className="overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-slate-100">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-5 py-4">
@@ -69,105 +230,52 @@ export default function AuthorityCommand() {
           <DemoSafetyMap compact />
         </section>
 
-        {/* Live Incident Feed */}
+        {/* Resource Pre-Positioning Recommendations */}
         <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm text-slate-900 dark:text-slate-100 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[.14em] text-slate-500 dark:text-slate-400">
-                  Live Dispatch Feed
-                </p>
-                <h2 className="mt-1 text-lg font-black text-slate-950 dark:text-white">Priority Queue</h2>
+                <span className="text-[10px] font-black uppercase tracking-wider text-cyan-700 dark:text-cyan-400">
+                  AI PRE-POSITIONING ENGINE [MODEL-DERIVED]
+                </span>
+                <h2 className="mt-0.5 text-base font-black text-slate-950 dark:text-white">
+                  Resource Pre-Positioning
+                </h2>
               </div>
-              <Link href="/authority/incidents" className="text-xs font-bold text-cyan-700 dark:text-cyan-400 hover:underline">
-                View all ({active.length})
-              </Link>
+              <Compass className="h-5 w-5 text-cyan-600" />
             </div>
 
             <div className="mt-4 space-y-3">
-              {active.slice(0, 4).map((incident) => (
-                <Link
-                  key={incident.id}
-                  href="/authority/incidents"
-                  className="block rounded-2xl border border-slate-200 dark:border-slate-800 p-3.5 transition hover:border-cyan-400 hover:bg-cyan-50/30 dark:hover:bg-slate-800/60"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-bold text-slate-900 dark:text-white">
-                        {incident.id} · {incident.type}
-                      </p>
-                      <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                        {incident.location} · {incident.touristId}
-                      </p>
-                    </div>
-                    <RiskBadge band={incident.severity} compact />
-                  </div>
-                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-800/80 pt-2">
-                    <span className="text-[10px] font-bold tracking-[.1em] text-cyan-800 dark:text-cyan-300">
-                      {incident.status}
-                    </span>
-                    <span className="text-[10px] text-slate-400">
-                      {new Date(incident.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              {prePositioningRecs.map((rec) => (
+                <div key={rec.id} className="rounded-2xl bg-cyan-50/70 dark:bg-cyan-950/40 p-4 border border-cyan-200 dark:border-cyan-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-cyan-900 dark:text-cyan-200">{rec.targetZoneName}</span>
+                    <span className="rounded-full bg-cyan-500 text-slate-950 px-2 py-0.5 text-[9px] font-black">
+                      {rec.priority}
                     </span>
                   </div>
-                </Link>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    Assign: {rec.recommendedResponderName}
+                  </p>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">{rec.reason}</p>
+                </div>
               ))}
             </div>
-          </div>
-
-          <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-3">
-            <Link
-              href="/pan-india"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-cyan-700 dark:text-cyan-400 hover:underline"
-            >
-              <Globe2 className="h-3.5 w-3.5" />
-              Pan-India Multi-State Command Center →
-            </Link>
           </div>
         </section>
       </div>
 
-      {/* Command Workflow & Integrity Principle */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
-        <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm text-slate-900 dark:text-slate-100">
-          <p className="text-xs font-bold uppercase tracking-[.14em] text-slate-500 dark:text-slate-400">
-            Official Response Protocol
-          </p>
-          <div className="mt-5 grid gap-4 sm:grid-cols-4">
-            {[
-              { icon: ShieldAlert, label: "Capture", text: "SOS enters state queue" },
-              { icon: AlertTriangle, label: "Verify", text: "Authority checks triage" },
-              { icon: RadioTower, label: "Dispatch", text: "Unit 04 assigned" },
-              { icon: Clock3, label: "Resolve", text: "SHA-256 audit anchor" },
-            ].map((step, index) => (
-              <div key={step.label} className="relative">
-                <div className="grid h-10 w-10 place-items-center rounded-xl bg-cyan-100 dark:bg-cyan-950 text-cyan-800 dark:text-cyan-300">
-                  <step.icon className="h-5 w-5" />
-                </div>
-                <p className="mt-3 text-sm font-bold text-slate-900 dark:text-white">
-                  {index + 1}. {step.label}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{step.text}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+      {/* Forensics Report & Evidence Graph Grid */}
+      <div className="mt-5 grid gap-5 xl:grid-cols-2">
+        <div>
+          <PostIncidentForensicsView report={forensicsReport} />
+        </div>
 
-        <section className="rounded-3xl bg-[#082235] p-6 text-white shadow-md">
-          <p className="text-xs font-bold uppercase tracking-[.14em] text-cyan-300">
-            Integrity Assurance
-          </p>
-          <h2 className="mt-1 text-lg font-bold">Resilient Pan-India Coordination</h2>
-          <p className="mt-3 text-xs leading-6 text-slate-300">
-            The incident and dispatch service operates independently from blockchain latency. Cryptographic audit hashing occurs at resolution to guarantee post-incident transparency without obstructing active life rescue.
-          </p>
-          <Link
-            href="/authority/audit"
-            className="mt-5 inline-flex items-center gap-2 text-xs font-bold text-cyan-300 hover:text-cyan-200"
-          >
-            Open Blockchain Audit Workspace <ArrowRight className="h-4 w-4" />
-          </Link>
-        </section>
+        {evidenceGraph && (
+          <div>
+            <IncidentEvidenceGraphView graph={evidenceGraph} />
+          </div>
+        )}
       </div>
     </SafetyShell>
   );
@@ -182,7 +290,7 @@ function Metric({
 }: {
   icon: React.ElementType;
   label: string;
-  value: number;
+  value: number | string;
   detail: string;
   tone: "rose" | "amber" | "cyan" | "green";
 }) {

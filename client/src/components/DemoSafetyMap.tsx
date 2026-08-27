@@ -30,10 +30,14 @@ function computeBounds(points: { lat: number; lng: number }[]) {
   };
 }
 
-const styles = {
+const styles: Record<string, string> = {
   SAFE: "border-emerald-500/70 bg-emerald-500/20 dark:bg-emerald-500/30",
   CAUTION: "border-amber-400/80 bg-amber-400/20 dark:bg-amber-400/30",
   DANGER: "border-rose-500/80 bg-rose-500/25 dark:bg-rose-500/35",
+  LOW: "border-emerald-500/70 bg-emerald-500/20 dark:bg-emerald-500/30",
+  MEDIUM: "border-amber-400/80 bg-amber-400/20 dark:bg-amber-400/30",
+  HIGH: "border-rose-500/80 bg-rose-500/25 dark:bg-rose-500/35",
+  CRITICAL: "border-rose-600/90 bg-rose-600/30 dark:bg-rose-600/40",
 };
 
 export function DemoSafetyMap({

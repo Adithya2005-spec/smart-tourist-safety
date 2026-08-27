@@ -12,11 +12,29 @@ import {
   ShieldCheck,
   Siren,
   Sparkles,
+  TrendingUp,
+  Clock,
+  HelpCircle,
+  CheckCircle2,
 } from "lucide-react";
 import { Link } from "wouter";
 
 export default function TouristHome() {
-  const { risk, locationName, online, activeGeofences, incidents, profile, language, activeState } = useSafety();
+  const {
+    risk,
+    locationName,
+    online,
+    activeGeofences,
+    incidents,
+    profile,
+    language,
+    activeState,
+    journeyState,
+    preSOSWarning,
+    riskForecast,
+    riskTimeline,
+    counterfactuals,
+  } = useSafety();
 
   const labels =
     language === "hi"
@@ -44,11 +62,50 @@ export default function TouristHome() {
         </Link>
       }
     >
+      {/* Pre-SOS Risk Warning Banner (Preventive Signal) */}
+      {preSOSWarning.triggered && (
+        <div className="mb-5 rounded-3xl border-2 border-amber-500/40 bg-amber-50 dark:bg-amber-950/40 p-5 text-amber-950 dark:text-amber-200 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="flex gap-3">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-amber-500 text-slate-950 font-bold">
+                <AlertTriangle className="h-6 w-6" />
+              </div>
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider bg-amber-200 dark:bg-amber-900/80 px-2 py-0.5 rounded-md text-amber-900 dark:text-amber-200">
+                  {preSOSWarning.title}
+                </span>
+                <h3 className="mt-1 text-base font-black">{preSOSWarning.message}</h3>
+                <ul className="mt-2 space-y-1 text-xs list-disc list-inside">
+                  {preSOSWarning.reasons.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/tourist/map"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 text-xs font-black transition shadow-sm"
+              >
+                Accept Safer Route <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/tourist/sos"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-amber-400/50 bg-amber-100 dark:bg-amber-900/40 px-3 py-2 text-xs font-bold transition"
+              >
+                Contact Emergency
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-5 xl:grid-cols-[1.4fr_.75fr]">
         {/* Main Status Banner */}
         <section className="rounded-3xl bg-[#082235] p-6 text-white shadow-xl shadow-slate-900/10 sm:p-8 relative overflow-hidden">
           <div className="absolute right-[-20px] top-[-20px] h-60 w-60 rounded-full bg-cyan-400/10 blur-2xl" />
-          
+
           <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
@@ -56,30 +113,29 @@ export default function TouristHome() {
                   <MapPin className="h-3 w-3" />
                   {activeState.name} ({activeState.code})
                 </span>
-                <Link
-                  href="/pan-india"
-                  className="text-[10px] font-bold text-slate-300 hover:text-white underline"
-                >
-                  Change State (36)
-                </Link>
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-300">
+                  Journey State: {journeyState}
+                </span>
               </div>
               <h2 className="max-w-xl text-2xl font-black tracking-tight sm:text-3xl">
                 Stay informed. Act with confidence in {activeState.name}.
               </h2>
               <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">
-                Your edge safety layer continuously checks cached risk zones, local police helplines ({activeState.emergency.touristPolice}), and keeps critical emergency actions ready.
+                Your edge safety layer continuously evaluates zonal risk, police helplines ({activeState.emergency.touristPolice}), and multi-horizon forecasts.
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-center backdrop-blur-sm">
               <p className="text-4xl font-black tabular-nums">{risk.score}</p>
-              <p className="mt-1 text-[10px] font-bold uppercase tracking-[.16em] text-slate-400">Risk score / 100</p>
+              <p className="mt-1 text-[10px] font-bold uppercase tracking-[.16em] text-slate-400">Current Risk / 100</p>
             </div>
           </div>
 
-          <div className="relative z-10 mt-7 grid gap-3 sm:grid-cols-3">
-            <InfoStat icon={MapPinned} label="Current Location" value={locationName} />
-            <InfoStat icon={online ? RadioTower : AlertTriangle} label="Edge Network" value={online ? "Connected" : "Offline Safe"} />
-            <InfoStat icon={ShieldCheck} label="Tourist Identity" value={profile.verification} />
+          {/* Multi-Horizon Risk Forecasting Row */}
+          <div className="relative z-10 mt-6 grid gap-2 sm:grid-cols-4 border-t border-white/10 pt-5">
+            <ForecastCard label="Current Risk" score={riskForecast.currentScore} severity={riskForecast.currentSeverity} highlight />
+            <ForecastCard label="+15 Min Forecast" score={riskForecast.forecast15m.score} severity={riskForecast.forecast15m.severity} />
+            <ForecastCard label="+30 Min Forecast" score={riskForecast.forecast30m.score} severity={riskForecast.forecast30m.severity} />
+            <ForecastCard label="+60 Min Forecast" score={riskForecast.forecast60m.score} severity={riskForecast.forecast60m.severity} />
           </div>
 
           <div className="relative z-10 mt-6 flex flex-wrap gap-3">
@@ -107,164 +163,101 @@ export default function TouristHome() {
           </div>
         </section>
 
-        {/* Contextual Risk Factors */}
+        {/* Counterfactual "WHAT IF?" Scenario Comparison */}
         <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
-              <p className="text-xs font-bold uppercase tracking-[.14em] text-slate-500 dark:text-slate-400">
-                Contextual Risk Evaluation
-              </p>
-              <RiskBadge score={risk.score} band={risk.band} />
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-cyan-700 dark:text-cyan-400">
+                  DECISION SUPPORT [MODEL-DERIVED]
+                </span>
+                <h3 className="mt-0.5 text-base font-black text-slate-900 dark:text-white">Counterfactual "WHAT IF?" Analysis</h3>
+              </div>
+              <HelpCircle className="h-5 w-5 text-cyan-600" />
             </div>
 
-            <div className="mt-5 space-y-3.5">
-              {risk.factors.map((factor, index) => (
-                <div key={factor} className="flex gap-3">
-                  <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300">
-                    0{index + 1}
+            <div className="mt-4 space-y-2.5">
+              {counterfactuals.map((scen) => (
+                <div
+                  key={scen.id}
+                  className={`rounded-2xl border p-3.5 transition ${
+                    scen.isRecommended
+                      ? "border-emerald-500/40 bg-emerald-50/70 dark:bg-emerald-950/30"
+                      : "border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {scen.isRecommended && <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />}
+                      <p className="text-xs font-bold text-slate-900 dark:text-white">{scen.title}</p>
+                    </div>
+                    <span
+                      className={`text-xs font-black ${
+                        scen.riskScore >= 70
+                          ? "text-rose-600"
+                          : scen.riskScore >= 45
+                          ? "text-amber-600"
+                          : "text-emerald-600"
+                      }`}
+                    >
+                      Risk {scen.riskScore}
+                    </span>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{factor}</p>
-                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                      Zonal factor for {activeState.name} corridor
-                    </p>
-                  </div>
+                  <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{scen.recommendationReason}</p>
                 </div>
               ))}
             </div>
           </div>
-
-          <div className="mt-6 border-t border-slate-100 dark:border-slate-800 pt-3">
-            <p className="text-[11px] leading-5 text-slate-500 dark:text-slate-400">
-              State Tourist Police: <strong>{activeState.emergency.touristPolice}</strong> · Central SOS: <strong>112</strong>
-            </p>
-          </div>
         </section>
       </div>
 
-      {/* Safety Actions & Active Alert Grid */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1.4fr_.75fr]">
-        <div className="space-y-5">
-          {primaryZone ? (
-            <SafetyNotice tone="rose">
-              <div className="flex gap-3">
-                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" />
-                <div>
-                  <p className="font-bold text-rose-950 dark:text-rose-200">High-risk area detected locally</p>
-                  <p className="mt-1 text-sm text-rose-900 dark:text-rose-300">
-                    You are within <strong>{primaryZone.name}</strong> ({activeState.name}). Current zone risk is <strong>{primaryZone.score}/100</strong>.
-                  </p>
-                  <Link href="/tourist/map" className="mt-2 inline-block text-xs font-bold underline underline-offset-4">
-                    Review safer alternate route options
-                  </Link>
-                </div>
-              </div>
-            </SafetyNotice>
-          ) : (
-            <SafetyNotice>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-cyan-700 dark:text-cyan-400" />
-                <p>
-                  <strong>Edge geofence active for {activeState.name}.</strong> {activeState.riskZones.length} cached risk zones remain actively evaluated on this device even with zero network.
-                </p>
-              </div>
-            </SafetyNotice>
-          )}
-
-          {/* Prepared Actions Grid */}
-          <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[.14em] text-slate-500 dark:text-slate-400">Safety actions</p>
-                <h3 className="mt-1 text-lg font-bold text-slate-900 dark:text-white">Prepared for the next decision</h3>
-              </div>
+      {/* Risk Explanation Timeline */}
+      <div className="mt-5">
+        <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-cyan-700 dark:text-cyan-400">
+                EXPLAINABILITY PIPELINE [MODEL-DERIVED]
+              </span>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">Risk Change Explanation Timeline</h3>
             </div>
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              <QuickLink href="/tourist/sos" icon={Siren} label={labels.sos} description="Create or queue emergency SOS" critical />
-              <QuickLink href="/pan-india" icon={Globe2} label="Pan-India (36)" description="Switch state safety & contacts" />
-              <QuickLink href="/tourist/identity" icon={IdCard} label="Digital ID" description="Show verified travel profile" />
-            </div>
+            <Clock className="h-5 w-5 text-cyan-600" />
           </div>
-        </div>
 
-        {/* Right Active Incident & Edge Connectivity Card */}
-        <aside className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-bold uppercase tracking-[.14em] text-slate-500 dark:text-slate-400">Active incident</p>
-              {activeIncident && <span className="text-xs font-bold text-rose-600 animate-pulse">LIVE SOS</span>}
-            </div>
-
-            {activeIncident ? (
-              <div className="mt-5">
-                <p className="text-lg font-black text-slate-900 dark:text-white">{activeIncident.id}</p>
-                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                  {activeIncident.type} · {activeIncident.location}
-                </p>
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="rounded-full bg-cyan-50 dark:bg-cyan-950 border border-cyan-200 dark:border-cyan-800 px-3 py-1 text-[11px] font-bold tracking-[.1em] text-cyan-800 dark:text-cyan-300">
-                    {activeIncident.status}
+          <div className="mt-5 grid gap-3 md:grid-cols-4">
+            {riskTimeline.map((item) => (
+              <div key={item.id} className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 p-4 border border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-400">
+                  <span>{item.time}</span>
+                  <span className={item.delta > 0 ? "text-rose-600 font-black" : "text-emerald-600 font-black"}>
+                    {item.delta > 0 ? `+${item.delta}` : item.delta} pts
                   </span>
-                  <Link href="/tourist/incidents" className="text-xs font-bold text-cyan-700 dark:text-cyan-400 hover:underline">
-                    Track status →
-                  </Link>
                 </div>
+                <p className="mt-2 text-sm font-bold text-slate-900 dark:text-white">{item.eventTitle}</p>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{item.explanation}</p>
               </div>
-            ) : (
-              <div className="mt-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 p-4 border border-slate-100 dark:border-slate-800">
-                <p className="text-sm font-bold text-slate-700 dark:text-slate-300">No active emergency</p>
-                <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                  Your incident status and responder ETA will appear here after an alert is dispatched.
-                </p>
-              </div>
-            )}
+            ))}
           </div>
-
-          <div className="mt-6 border-t border-slate-100 dark:border-slate-800 pt-4">
-            <EdgeConnectivity />
-          </div>
-        </aside>
+        </section>
       </div>
     </SafetyShell>
   );
 }
 
-function InfoStat({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+function ForecastCard({ label, score, severity, highlight }: { label: string; score: number; severity: string; highlight?: boolean }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[.05] p-3.5 backdrop-blur-sm">
-      <Icon className="h-4 w-4 text-cyan-300" />
-      <p className="mt-3 text-[10px] font-bold uppercase tracking-[.13em] text-slate-400">{label}</p>
-      <p className="mt-1 truncate text-sm font-bold text-white">{value}</p>
-    </div>
-  );
-}
-
-function QuickLink({
-  href,
-  icon: Icon,
-  label,
-  description,
-  critical,
-}: {
-  href: string;
-  icon: React.ElementType;
-  label: string;
-  description: string;
-  critical?: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`group rounded-2xl border p-4 transition-all ${
-        critical
-          ? "border-rose-200 dark:border-rose-900/50 bg-rose-50/80 dark:bg-rose-950/30 hover:border-rose-300"
-          : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 hover:border-cyan-300 dark:hover:border-cyan-700 hover:bg-cyan-50/30 dark:hover:bg-slate-800"
+    <div
+      className={`rounded-2xl p-3 border backdrop-blur-sm ${
+        highlight
+          ? "bg-cyan-400/20 border-cyan-400/40 text-cyan-200"
+          : "bg-white/5 border-white/10 text-slate-300"
       }`}
     >
-      <Icon className={`h-5 w-5 ${critical ? "text-rose-600 dark:text-rose-400" : "text-cyan-700 dark:text-cyan-400"}`} />
-      <p className="mt-3 text-sm font-bold text-slate-800 dark:text-slate-100">{label}</p>
-      <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{description}</p>
-      <ArrowRight className="mt-3 h-4 w-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
-    </Link>
+      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
+      <div className="mt-1 flex items-baseline justify-between">
+        <p className="text-xl font-black text-white">{score}</p>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-cyan-300">{severity}</span>
+      </div>
+    </div>
   );
 }

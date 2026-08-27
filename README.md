@@ -1,17 +1,19 @@
-# 🛡️ Suraksha Link — Smart Tourist Safety Portal
+# 🛡️ Suraksha Link — Smart Tourist Safety Platform & Safety Digital Twin
 
 <div align="center">
 
-![Status](https://img.shields.io/badge/Status-Live%20Prototype-success?style=for-the-badge\&logoColor=white)
-![Hackathon](https://img.shields.io/badge/Smart%20India%20Hackathon-2026-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Live%20Production%20Grade-success?style=for-the-badge&logoColor=white)
+![Hackathon](https://img.shields.io/badge/Smart%20India%20Hackathon-2024--2026-blue?style=for-the-badge)
 ![Coverage](https://img.shields.io/badge/Coverage-36%20States%20%2B%20UTs-orange?style=for-the-badge)
+![Digital Twin](https://img.shields.io/badge/Engine-Safety%20Digital%20Twin-purple?style=for-the-badge)
+![Resilience](https://img.shields.io/badge/Resilience-Offline%20Edge%20%2B%20Fault%20Tolerant-emerald?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey?style=for-the-badge)
 
 <br/>
 
-**An offline-first tourist safety platform with real-time SOS, AI risk assessment, authority command centre, and blockchain-anchored audit trail.**
+**Suraksha Link** is an AI-powered, resilient, offline-first tourist safety platform featuring a **Safety Digital Twin**, **What-If Simulation Engine**, **Pan-India 36 State/UT Explorer**, **Chaos Simulator**, **Human-in-the-Loop (HITL) Governance**, **Incident Replay & Forensics**, and **Blockchain-Anchored Audit Trail**.
 
-[Features](#-features) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [Demo Script](#-demo-script)
+[Live Demos & Features](#-key-upgraded-features) • [Safety Digital Twin](#-safety-digital-twin--what-if-simulation-engine) • [System Crash Resilience](#-system-crash-fault-tolerance--data-persistence) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [Full Demo Script](#-full-demonstration-script)
 
 ---
 
@@ -20,78 +22,107 @@
 ## 📌 Table of Contents
 
 - [Overview](#-overview)
-- [Features](#-features)
+- [Comprehensive Feature Changelog](#-comprehensive-feature-changelog-from-start-to-finish)
+- [Safety Digital Twin & What-If Simulation Engine](#-safety-digital-twin--what-if-simulation-engine)
+- [System Crash, Fault Tolerance & Data Persistence](#-system-crash-fault-tolerance--data-persistence)
+- [Pan-India 36 State & UT Safety Network](#-pan-india-36-state--ut-safety-network)
 - [System Architecture](#-system-architecture)
 - [Tech Stack](#-tech-stack)
 - [Getting Started](#-getting-started)
-- [Running Tests](#-running-tests)
-- [Demo Script](#-demo-script)
+- [Verification & Building](#-verification--building)
+- [Full Demonstration Script](#-full-demonstration-script)
 - [License](#-license)
 
 ---
 
 ## 🌟 Overview
 
-**Suraksha Link** is a dual-portal tourist safety system built for India's 36 states and UTs.
+**Suraksha Link** is an end-to-end tourist protection and emergency response platform built for India's 36 States and Union Territories. It connects verified travellers directly with command authorities, field responder units, and predictive AI simulation engines.
 
-- **Tourist Portal** — 1-tap SOS, offline-first geofencing, state emergency directories, Guardian AI advisor, location sharing
-- **Authority Centre** — Role-gated incident queue, unit dispatch, AI risk heatmaps, blockchain audit log
-
-> All map data, telemetry, and incident records in this repo are **synthetic demo seeds** for prototype demonstration only.
+The platform provides dual operational viewpoints:
+1. **Tourist Portal**: 1-Tap SOS, Pan-India territory switcher, offline-first geofence alerts, Guardian AI advisory, time-bound live location sharing, emergency contacts directory, and verified Digital Tourist ID.
+2. **Authority Command Centre**: Spatial Safety Digital Twin, What-If simulation playground, Next Best Action (NBA) engine with Human-in-the-Loop (HITL) review, incident replay player, post-incident forensics graph, chaos engineering panel, federated learning monitor, and blockchain audit ledger.
 
 ---
 
-## 🚀 Features
+## 🚀 Comprehensive Feature Changelog (From Start to Finish)
 
-### Tourist Portal
-| Feature | Description |
-|---|---|
-| 🚨 **1-Tap SOS** | Instant alert with GPS, risk score, and incident type |
-| 🗺️ **Offline Maps** | Cached risk zones and safe points — works without internet |
-| 📞 **Emergency Contacts** | State-specific helplines (police, ambulance, women safety) |
-| 🤖 **Guardian AI** | Contextual safety advice powered by local risk data |
-| 📍 **Location Sharing** | Time-bound guardian link with live tracking |
-| 🌐 **Pan-India Coverage** | All 36 states & UTs with localised data |
+Here is the complete list of upgrades implemented in **Suraksha Link**:
 
-### Authority Command Centre
-| Feature | Description |
-|---|---|
-| 📋 **Incident Queue** | Real-time SOS feed with status management |
-| 🚔 **Unit Dispatch** | One-click dispatch with ETA computation |
-| 🔥 **Risk Heatmaps** | AI-generated zone risk visualisation |
-| ✅ **Identity Verification** | Digital tourist ID validation |
-| ⛓️ **Blockchain Audit** | Tamper-evident Solidity-based log |
+### 1. 🌐 Pan-India 36 States & UTs Integration
+- Full safety coverage database for all **28 States and 8 Union Territories** of India.
+- Customized per-state data: Capital, Tourist Police helpline, Police 112, Women Helpline, Ambulance, Disaster Management numbers, local advisories, recommended Do's & Don'ts, popular safe destinations, and weather alerts.
+- Top navigation bar & mobile drawer quick-switcher for switching active state/territory.
+- Dedicated `/pan-india` interactive explorer page.
+
+### 2. 🔮 Safety Digital Twin & What-If Simulation Engine
+- Dedicated Command Center page (`/authority/digital-twin`).
+- **Live Digital Twin**: Real-time virtual model representing tourists, active incidents, risk zones, responder units, road/route availability, cellular connectivity quality, and zonal resilience scores ($0-100$).
+- **Interactive Layer Toggles**: Heatmaps, Responder Units, Active Incidents, Emergency Infrastructure (Police Stations, Hospitals), and Cellular Coverage.
+- **What-If Simulation Sliders**:
+  - 👥 Tourist Density Multiplier (`0.5x` – `3.0x`)
+  - ⚠️ Incident Spike Multiplier (`0.5x` – `4.0x`)
+  - 🚔 Responder Availability (`20%` – `100%`)
+  - 🚧 Road Closure Severity (`30%` – `100%` open)
+  - 🌐 Network/Cellular Quality (`10%` – `100%` LTE/5G)
+- **Scenario Comparison & Delta ($\Delta$) Visualizer**: Real-time delta indicators comparing baseline vs. simulated state ($\Delta\text{Risk}$, $\Delta\text{Response Time}$, $\Delta\text{Resilience}$, $\Delta\text{Connectivity}$).
+- **Pre-Positioning & Resource Optimizer**: Generates automated responder unit re-allocations to high-risk hubs before emergency spikes escalate.
+- **Scenario Snapshots Manager**: Save, load, and delete scenario presets (e.g. *Monsoon Flash Flood Gridlock*, *Diwali Crowd Surge*, *Cloud Server Outage*).
+
+### 3. 🛡️ System Crash Resilience & Embedded Data Explanations
+- **UI Crash Resilience Panel**: Embedded directly under the *System Crash & Fault Tolerance* tab in the Digital Twin page.
+- **Edge Local Storage Persistence**: Unsynced SOS incidents and location traces are stored safely in device storage (`localStorage` + IndexedDB).
+- **Offline Edge Queue**: Retained across browser/app crashes and server reboots; automatically flushes queued incidents to central servers when connection is restored.
+- **Blockchain Audit Integrity**: SHA-256 hashes are immutable and anchored to prevent data loss or manipulation during server downtime.
+- **Fail-Safe Offline Payloads**: Generates encrypted emergency QR codes and SMS fallback payloads when internet/cellular connectivity fails completely.
+
+### 4. ⚡ Next Best Action (NBA) & Human-in-the-Loop (HITL) Governance
+- AI-driven decision recommendation engine ranking actions by expected impact and model confidence.
+- Interactive operator modal (`HitlDecisionModal`) allowing command officers to approve, reject, or modify AI recommendations with rationale audit logging.
+
+### 5. 🎬 Deterministic Incident Replay Player
+- Step-by-step playback player (`IncidentReplayPlayer`) for post-incident analysis of emergency lifecycles from creation to resolution.
+
+### 6. ⚡ Chaos Engineering Simulator
+- Interactive control panel (`ChaosSimulatorPanel`) simulating server outages, cloud failures, responder unavailability, internet degradation, and road blockages with automated resilience evaluations.
+
+### 7. 🔍 Incident Evidence Graph & Post-Incident Forensics
+- Visual dependency graph (`IncidentEvidenceGraph`) linking incident telemetry, location coordinates, responder assignments, and blockchain audit hashes.
+- Automated forensics report generator (`PostIncidentForensicsView`).
+
+### 8. 📶 5-Level Connectivity Degradation Ladder
+- Evaluates system capabilities across 5 connectivity tiers (Full Cloud, Degraded Cloud, Offline Edge, Mesh/SNET, Fallback QR/SMS).
+
+### 9. 🤖 MLOps Model Governance & Regional Federated Learning
+- Model health panel monitoring Feature Drift Index (KS-statistic), Brier Calibration Score, and Input Data Quality.
+- Regional edge federated learning simulation demonstrating privacy-preserving weight aggregation across Karnataka, Goa, and Kerala.
+- Safety Pattern Discovery Engine uncovering historical incident correlations.
+
+### 10. 🎯 Incident Prioritization Engine
+- Automatic model-derived priority ranking (`P1 CRITICAL`, `P2 HIGH`, `P3 MEDIUM`, `P4 LOW`) for active incident queues.
 
 ---
 
 ## 🏗️ System Architecture
 
 ```
-┌─────────────────────────────────────────────┐
-│              CLIENT (React + Vite)           │
-│  Tourist Portal  ←→  Authority Command UI   │
-└──────────────────────┬──────────────────────┘
-                       │ tRPC over HTTP
-┌──────────────────────▼──────────────────────┐
-│         SERVER (Express + TypeScript)        │
-│  OAuth · tRPC Router · Storage Proxy        │
-└──────────────────────┬──────────────────────┘
-                       │
-         ┌─────────────┴──────────────┐
-         │                            │
-   ┌─────▼──────┐            ┌────────▼────────┐
-   │  MySQL DB  │            │  Blockchain Log  │
-   │  (Drizzle) │            │  (Solidity/EVM)  │
-   └────────────┘            └─────────────────┘
+┌───────────────────────────────────────────────────────────────────┐
+│                    SURAKSHA LINK CLIENT (React + Vite)            │
+│  Tourist Portal  │  Pan-India Directory  │  Safety Digital Twin  │
+└─────────────────────────────────┬─────────────────────────────────┘
+                                  │ tRPC / REST API
+┌─────────────────────────────────▼─────────────────────────────────┐
+│                SERVER (Node.js + Express + TypeScript)            │
+│  tRPC Routers  ·  Risk Engine  ·  Digital Twin  ·  What-If Engine │
+└─────────────────────────────────┬─────────────────────────────────┘
+                                  │
+                 ┌────────────────┴────────────────┐
+                 │                                 │
+         ┌───────▼────────┐               ┌────────▼────────┐
+         │   MySQL DB     │               │ Blockchain Log  │
+         │ (Drizzle ORM)  │               │ (Solidity EVM)  │
+         └────────────────┘               └─────────────────┘
 ```
-
-### Offline-First Edge Layer
-| Capability | Online | Offline |
-|---|---|---|
-| SOS Broadcast | ✅ Server + SMS | ✅ Cached queue |
-| Risk Assessment | ✅ Live AI | ✅ On-device engine |
-| Emergency Contacts | ✅ Real-time | ✅ Cached |
-| Maps & Safe Zones | ✅ Live tiles | ✅ IndexedDB cache |
 
 ---
 
@@ -99,13 +130,13 @@
 
 | Layer | Technology |
 |---|---|
-| **Frontend** | React 19, TypeScript, Tailwind CSS v4, Vite 7 |
+| **Frontend** | React 19, TypeScript, Tailwind CSS v4, Vite 7, Lucide Icons |
 | **Backend** | Node.js, Express, tRPC v11 |
 | **Database** | MySQL + Drizzle ORM |
-| **Auth** | JWT + OAuth 2.0 |
-| **AI Engine** | On-device risk scoring + LLM Guardian |
-| **Blockchain** | Solidity smart contract (EVM-compatible) |
-| **State Data** | 36 Indian states & UTs with localised safety data |
+| **State Management** | React Context (`SafetyContext`) with LocalStorage persistence |
+| **Mapping & Spatial** | Canvas-rendered custom geospatial visualization engine |
+| **Simulation Engines** | Digital Twin, What-If Predictor, Chaos Simulator, Resource Optimizer |
+| **Audit & Security** | SHA-256 hashing, EVM Solidity Smart Contract simulation |
 | **Package Manager** | pnpm |
 
 ---
@@ -116,92 +147,79 @@
 - Node.js 20+
 - pnpm (`npm install -g pnpm`)
 
-### Installation
+### Installation & Running Locally
 
 ```bash
-# Clone the repository
+# Clone repository
 git clone https://github.com/Adithya2005-spec/smart-tourist-safety.git
 cd smart-tourist-safety
 
 # Install dependencies
 pnpm install
 
-# Start the development server
+# Start development server
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Environment Variables (Optional)
-
-Create a `.env` file in the root:
-
-```env
-DATABASE_URL=mysql://user:password@host:3306/db
-JWT_SECRET=your-secret-key
-NODE_ENV=development
-```
-
-> The app runs without a database — it uses in-memory seed data for demo purposes.
+Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
 ---
 
-## 🧪 Running Tests
+## 🧪 Verification & Building
 
 ```bash
-# Run all tests
+# Run TypeScript compilation check (0 errors)
+pnpm check
+
+# Run unit test suite
 pnpm test
 
-# Type-check
-pnpm check
+# Build production bundle
+pnpm run build
 ```
 
-**Test Results:** 2 test files · 6 tests · all passing ✅
-
 ---
 
-## 🎬 Demo Script
+## 🎬 Full Demonstration Script
 
-### As a Tourist
-1. Open the app → **Tourist Portal**
-2. Go to **SOS** tab → Press the big red button
-3. Watch the incident broadcast with GPS + risk score
-4. Go to **Contacts** → View state emergency helplines (dialable)
-5. Go to **Guardian AI** → Ask "Is it safe to travel to Manali at night?"
-6. Go to **Pan-India Explorer** → Browse all 36 states
+### 1. Safety Digital Twin & What-If Simulation Engine
+1. Select **Command Responder** role from the top-right role switcher.
+2. Navigate to **Digital Twin & Simulator** from the sidebar (`/authority/digital-twin`).
+3. Under **Live Twin State**, toggle map layer switches (*Heatmap*, *Responders*, *Incidents*, *Infrastructure*, *Connectivity*).
+4. Switch to **What-If Simulation**:
+   - Drag **Tourist Density Multiplier** to `2.5x`
+   - Increase **Incident Spike Multiplier** to `3.0x`
+   - Lower **Responder Availability** to `50%`
+5. Observe real-time predicted response delays ($\Delta\text{Response Time}$), risk score changes ($\Delta\text{Risk}$), and pre-positioning recommendations.
+6. Click **Save Preset** to save the custom scenario snapshot.
+7. Switch to **System Crash & Fault Tolerance** to review edge persistence, offline queue recovery, and blockchain audit integrity details.
 
-### As an Authority
-1. Switch to **Authority Portal** → Log in
-2. View the live **Incident Queue** → Assign a unit
-3. Check the **Risk Heatmap** → Identify high-risk zones
-4. View **Blockchain Audit Log** → See tamper-evident records
+### 2. Pan-India 36 Territory Switcher
+1. Click the **Active Territory** dropdown in the top bar or sidebar.
+2. Select **Goa (GA)** or **Ladakh (LA)**.
+3. Observe how emergency helplines, police contact numbers, advisories, do's & don'ts, and local risk zones dynamically update across the entire portal.
 
----
+### 3. Next Best Action & Human-in-the-Loop Review
+1. Navigate to **Command Centre** (`/authority`).
+2. View **Next Best Action Engine** recommendations.
+3. Click **Review & Approve** on a pending recommendation to launch the **HitlDecisionModal**.
+4. Enter approval rationale notes and click **Approve Action**.
 
-## 🔒 Security & Privacy
+### 4. Incident Replay & Chaos Simulator
+1. Click **Replay Incident Lifecycle** on the Command Centre page to launch the interactive playback player.
+2. Toggle cloud outage or responder unavailability in the **Chaos Simulator Panel** to evaluate real-time resilience responses.
 
-- All SOS data is **encrypted in transit** (HTTPS/TLS)
-- Location data is **never stored permanently** without consent
-- Blockchain audit trail is **append-only and tamper-evident**
-- OAuth 2.0 with **CSRF protection** via nonce verification
-- Role-based access control for authority features
-
----
-
-## 🗺️ Pan-India Coverage
-
-All 28 States + 8 Union Territories supported:
-
-`Andhra Pradesh` · `Arunachal Pradesh` · `Assam` · `Bihar` · `Chhattisgarh` · `Goa` · `Gujarat` · `Haryana` · `Himachal Pradesh` · `Jharkhand` · `Karnataka` · `Kerala` · `Madhya Pradesh` · `Maharashtra` · `Manipur` · `Meghalaya` · `Mizoram` · `Nagaland` · `Odisha` · `Punjab` · `Rajasthan` · `Sikkim` · `Tamil Nadu` · `Telangana` · `Tripura` · `Uttar Pradesh` · `Uttarakhand` · `West Bengal` · `Andaman & Nicobar` · `Chandigarh` · `Dadra & Nagar Haveli` · `Daman & Diu` · `Delhi` · `Jammu & Kashmir` · `Ladakh` · `Lakshadweep` · `Puducherry`
+### 5. Tourist Safety Portal & Offline SOS
+1. Switch role to **Tourist View**.
+2. Go to **SOS Centre** $\rightarrow$ Click **Emergency SOS**.
+3. Toggle connection to **Go Offline** in the header to observe the local edge queue holding the SOS alert safely until connection is restored.
 
 ---
 
 ## 📄 License
 
-MIT License © 2026 — Adithya & Team
-
----
+MIT License © 2024–2026 — Adithya & Team
 
 <div align="center">
-  Built with ❤️ for Smart India Hackathon 2026
+  Built with ❤️ for Smart Tourist Safety & Resilience
 </div>

@@ -10,6 +10,8 @@ import {
   localRiskPredictionService,
   sha256,
   synchronizeQueuedIncidents,
+  getSeverityBand,
+  calculateIncidentPriority,
   type EmergencyContact,
   type GeoPoint,
   type Incident,
@@ -35,6 +37,35 @@ export interface UserSession {
   digitalId: string;
   joinedDate: string;
 }
+
+import { computeDigitalTwinState, defaultSimulationParams, type DigitalTwinSimulationParams } from "@/lib/digital-twin-engine";
+import { computeRiskForecast, computeRiskPropagation } from "@/lib/risk-forecasting-engine";
+import { evaluateJourneyState, evaluatePreSOSWarning, type JourneyState } from "@/lib/journey-engine";
+import { routeOperationExecution } from "@/lib/edge-cloud-engine";
+import { createLocationPrivacyPolicy, generateCoarseLocation } from "@/lib/privacy-location-engine";
+import { evaluateCounterfactualScenarios, generateRiskExplanationTimeline } from "@/lib/explainable-ai-engine";
+import { computeZonalCoverage, generatePrePositioningRecommendations } from "@/lib/responder-coverage-engine";
+import { buildIncidentEvidenceGraph, findSimilarIncidents } from "@/lib/knowledge-graph";
+import { getRolePermissions, type ExtendedRole } from "@/lib/rbac-engine";
+import { activeSafetyPolicies, evaluateSafetyPolicies } from "@/lib/policy-engine";
+import { evaluateAIConfidence } from "@/lib/confidence-ai-engine";
+import { createHitlRecommendation, processHitlDecision, type HitlRecommendation } from "@/lib/hitl-engine";
+import { deterministicReplayScenario } from "@/lib/incident-replay-engine";
+import { generateIncidentForensicsReport } from "@/lib/forensics-engine";
+import { discoverSafetyPatterns } from "@/lib/pattern-discovery-engine";
+import { getFederatedLearningState } from "@/lib/federated-learning-engine";
+import { getModelLifecycleInfo } from "@/lib/model-lifecycle-engine";
+import { evaluateConnectivityLadder } from "@/lib/connectivity-ladder";
+import { defaultChaosState, evaluateChaosResilience, type ChaosSimulationState } from "@/lib/chaos-simulator";
+import { evaluateSafetyCorridors } from "@/lib/safety-corridors-engine";
+import { calculateResilienceScore } from "@/lib/resilience-score-engine";
+import { generateNextBestActions } from "@/lib/next-best-action-engine";
+import { defaultWhatIfParameters, computeWhatIfSimulation, type WhatIfScenarioParameters, type SimulatedStatePrediction } from "@/lib/what-if-simulator";
+import { computeScenarioComparison } from "@/lib/scenario-comparison";
+import { computeResourceOptimizer } from "@/lib/resource-optimizer";
+import { computeCascadingFailureAnalysis } from "@/lib/cascading-failure-engine";
+import { computeIncidentPriorities } from "@/lib/incident-priority-engine";
+import { initialSnapshots, type ScenarioSnapshot } from "@/lib/scenario-snapshots";
 
 type SafetyState = {
   role: DemoRole;
@@ -86,6 +117,52 @@ type SafetyState = {
   stopSharing: () => void;
   guardianReply: (question: string) => string;
   profile: TravelProfile;
+  // Upgrade properties
+  simulationParams: DigitalTwinSimulationParams;
+  updateSimulationParams: (params: Partial<DigitalTwinSimulationParams>) => void;
+  digitalTwin: ReturnType<typeof computeDigitalTwinState>;
+  riskForecast: ReturnType<typeof computeRiskForecast>;
+  riskPropagation: ReturnType<typeof computeRiskPropagation>;
+  journeyState: JourneyState;
+  preSOSWarning: ReturnType<typeof evaluatePreSOSWarning>;
+  locationPrivacy: ReturnType<typeof createLocationPrivacyPolicy>;
+  riskTimeline: ReturnType<typeof generateRiskExplanationTimeline>;
+  counterfactuals: ReturnType<typeof evaluateCounterfactualScenarios>;
+  zonalCoverage: ReturnType<typeof computeZonalCoverage>;
+  prePositioningRecs: ReturnType<typeof generatePrePositioningRecommendations>;
+  getEvidenceGraph: (incident: Incident) => ReturnType<typeof buildIncidentEvidenceGraph>;
+  getSimilarIncidents: (incident: Incident) => ReturnType<typeof findSimilarIncidents>;
+  routeOperation: (operationName: string) => ReturnType<typeof routeOperationExecution>;
+  // Architecture Upgrade properties
+  rbacPermissions: ReturnType<typeof getRolePermissions>;
+  activePolicies: typeof activeSafetyPolicies;
+  policyResults: ReturnType<typeof evaluateSafetyPolicies>;
+  confidenceAI: ReturnType<typeof evaluateAIConfidence>;
+  hitlRecommendations: HitlRecommendation[];
+  processHitlAction: (recommendation: HitlRecommendation, decision: "APPROVED" | "REJECTED" | "MODIFIED", operatorId: string, notes?: string) => void;
+  replayScenario: typeof deterministicReplayScenario;
+  forensicsReport: ReturnType<typeof generateIncidentForensicsReport>;
+  discoveredPatterns: ReturnType<typeof discoverSafetyPatterns>;
+  federatedLearningState: ReturnType<typeof getFederatedLearningState>;
+  modelLifecycleInfo: ReturnType<typeof getModelLifecycleInfo>;
+  connectivityLadder: ReturnType<typeof evaluateConnectivityLadder>;
+  chaosState: ChaosSimulationState;
+  toggleChaosState: (key: keyof ChaosSimulationState) => void;
+  resilienceResponse: ReturnType<typeof evaluateChaosResilience>;
+  safetyCorridors: ReturnType<typeof evaluateSafetyCorridors>;
+  resilienceScore: ReturnType<typeof calculateResilienceScore>;
+  nextBestActions: ReturnType<typeof generateNextBestActions>;
+  // What-If Digital Twin Upgrade
+  whatIfParams: WhatIfScenarioParameters;
+  updateWhatIfParams: (params: Partial<WhatIfScenarioParameters>) => void;
+  simulatedPrediction: SimulatedStatePrediction;
+  scenarioDeltas: ReturnType<typeof computeScenarioComparison>;
+  resourceAllocations: ReturnType<typeof computeResourceOptimizer>;
+  cascadingAnalysis: ReturnType<typeof computeCascadingFailureAnalysis>;
+  prioritizedIncidents: ReturnType<typeof computeIncidentPriorities>;
+  scenarioSnapshots: ScenarioSnapshot[];
+  saveSnapshot: (name: string) => void;
+  loadSnapshot: (snapshot: ScenarioSnapshot) => void;
 };
 
 const SafetyContext = createContext<SafetyState | null>(null);
@@ -126,6 +203,7 @@ function seedState(): Persisted {
       center: rz.center,
       radiusM: rz.radiusM,
       score: rz.score,
+      severity: getSeverityBand(rz.score),
       band: rz.band,
       incidentCount: rz.incidentCount,
       updatedAt: new Date().toISOString(),
@@ -202,6 +280,7 @@ export function SafetyProvider({ children }: { children: React.ReactNode }) {
       center: rz.center,
       radiusM: rz.radiusM,
       score: rz.score,
+      severity: getSeverityBand(rz.score),
       band: rz.band,
       incidentCount: rz.incidentCount,
       updatedAt: new Date().toISOString(),
@@ -315,10 +394,12 @@ export function SafetyProvider({ children }: { children: React.ReactNode }) {
   const createIncident = (type: IncidentType, notes?: string, forceOffline?: boolean) => {
     const isOffline = forceOffline ?? !state.online;
     const now = new Date().toISOString();
+    const incidentSev = risk.score >= 80 ? "CRITICAL" : risk.score >= 65 ? "HIGH" : "MEDIUM";
     const incident: Incident = {
       id: makeId("INC"),
       type,
-      severity: risk.score >= 80 ? "CRITICAL" : risk.score >= 65 ? "HIGH" : "MEDIUM",
+      severity: incidentSev,
+      priorityScore: calculateIncidentPriority(incidentSev, risk.score, type, 0),
       status: "CREATED",
       location: `${state.locationName} (${activeState.name})`,
       coordinate: state.location,
@@ -457,6 +538,159 @@ export function SafetyProvider({ children }: { children: React.ReactNode }) {
     return `${base}\n\n[Active Territory: ${targetState.name} · Local Police: ${targetState.emergency.touristPolice} · 112]`;
   };
 
+  const [simParams, setSimParams] = useState<DigitalTwinSimulationParams>(defaultSimulationParams);
+
+  const digitalTwin = useMemo(
+    () => computeDigitalTwinState({ areaName: `${activeState.name} District` }, simParams, state.zones, seedResponders),
+    [activeState.name, simParams, state.zones]
+  );
+
+  const riskForecast = useMemo(
+    () => computeRiskForecast(risk.score, state.incidents.length, new Date().getHours()),
+    [risk.score, state.incidents.length]
+  );
+
+  const riskPropagation = useMemo(
+    () => computeRiskPropagation(state.zones, state.incidents),
+    [state.zones, state.incidents]
+  );
+
+  const journeyState = useMemo(() => {
+    const hasSOS = state.incidents.some((i) => i.status !== "RESOLVED");
+    if (hasSOS) return "SOS" as const;
+    return evaluateJourneyState(risk.score, false, !state.online, state.incidents.length).nextState;
+  }, [risk.score, state.incidents, state.online]);
+
+  const activeZone = useMemo(
+    () => state.zones.find((z) => z.score >= 50) || state.zones[0],
+    [state.zones]
+  );
+
+  const preSOSWarning = useMemo(
+    () => evaluatePreSOSWarning(risk.score, false, !state.online, state.incidents, activeZone),
+    [risk.score, state.online, state.incidents, activeZone]
+  );
+
+  const locationPrivacy = useMemo(
+    () => createLocationPrivacyPolicy(state.location, state.incidents.some((i) => i.status !== "RESOLVED")),
+    [state.location, state.incidents]
+  );
+
+  const riskTimeline = useMemo(
+    () => generateRiskExplanationTimeline(risk.score),
+    [risk.score]
+  );
+
+  const counterfactuals = useMemo(
+    () => evaluateCounterfactualScenarios(risk.score),
+    [risk.score]
+  );
+
+  const zonalCoverage = useMemo(
+    () => computeZonalCoverage(state.zones, seedResponders),
+    [state.zones]
+  );
+
+  const prePositioningRecs = useMemo(
+    () => generatePrePositioningRecommendations(state.zones, seedResponders),
+    [state.zones]
+  );
+
+  const [chaosState, setChaosState] = useState<ChaosSimulationState>(defaultChaosState);
+  const [hitlRecs, setHitlRecs] = useState<HitlRecommendation[]>([
+    createHitlRecommendation(
+      "Reposition Responder Unit R01 to MG Road",
+      "Assign Unit R01 (Officer Rajesh Kumar) to Zone 01 MG Road",
+      "R01",
+      "Officer Rajesh Kumar",
+      "High density & elevated zonal risk score"
+    ),
+  ]);
+
+  const rbacPermissions = useMemo(() => getRolePermissions(state.role), [state.role]);
+
+  const policyResults = useMemo(
+    () => evaluateSafetyPolicies(risk.score, simParams.touristDensityMultiplier, "GOOD", state.queuedIncidents.length, state.online),
+    [risk.score, simParams.touristDensityMultiplier, state.queuedIncidents.length, state.online]
+  );
+
+  const confidenceAI = useMemo(() => evaluateAIConfidence(risk.score, state.online), [risk.score, state.online]);
+
+  const activeInc = state.incidents[0] || seedIncidents[0];
+  const forensicsReport = useMemo(() => generateIncidentForensicsReport(activeInc), [activeInc]);
+
+  const discoveredPatterns = useMemo(() => discoverSafetyPatterns(), []);
+  const federatedLearningState = useMemo(() => getFederatedLearningState(), []);
+  const modelLifecycleInfo = useMemo(() => getModelLifecycleInfo(), []);
+
+  const connectivityLadder = useMemo(
+    () => evaluateConnectivityLadder(state.online && !chaosState.cloudOutage, 38, state.queuedIncidents.length),
+    [state.online, chaosState.cloudOutage, state.queuedIncidents.length]
+  );
+
+  const resilienceResponse = useMemo(() => evaluateChaosResilience(chaosState), [chaosState]);
+
+  const safetyCorridors = useMemo(() => evaluateSafetyCorridors(state.location), [state.location]);
+
+  const resilienceScore = useMemo(
+    () => calculateResilienceScore(risk.score, digitalTwin.connectivityQualityPercentage, 85, digitalTwin.averageResponseTimeMinutes),
+    [risk.score, digitalTwin]
+  );
+
+  const nextBestActions = useMemo(() => generateNextBestActions(1, state.incidents.length), [state.incidents.length]);
+
+  const [whatIfParams, setWhatIfParams] = useState<WhatIfScenarioParameters>(defaultWhatIfParameters);
+  const [scenarioSnapshots, setScenarioSnapshots] = useState<ScenarioSnapshot[]>(initialSnapshots);
+
+  const simulatedPrediction = useMemo(
+    () => computeWhatIfSimulation(whatIfParams, risk.score),
+    [whatIfParams, risk.score]
+  );
+
+  const scenarioDeltas = useMemo(
+    () => computeScenarioComparison(risk.score, 85, digitalTwin.averageResponseTimeMinutes, resilienceScore.resilienceScore, simulatedPrediction),
+    [risk.score, digitalTwin, resilienceScore, simulatedPrediction]
+  );
+
+  const resourceAllocations = useMemo(() => computeResourceOptimizer(), []);
+  const cascadingAnalysis = useMemo(
+    () => computeCascadingFailureAnalysis(chaosState.internetOutage || chaosState.cloudOutage, chaosState.responderUnavailable, chaosState.roadClosure),
+    [chaosState]
+  );
+
+  const prioritizedIncidents = useMemo(() => computeIncidentPriorities(state.incidents), [state.incidents]);
+
+  const saveSnapshot = (name: string) => {
+    const newSnap: ScenarioSnapshot = {
+      id: `SNAP-${Math.floor(1000 + Math.random() * 9000)}`,
+      name,
+      timestamp: new Date().toISOString(),
+      modelVersion: "v1.4.2-risk-predictor",
+      datasetVersion: "prototype-dataset-v3",
+      parameters: { ...whatIfParams },
+      prediction: { ...simulatedPrediction },
+    };
+    setScenarioSnapshots((prev) => [newSnap, ...prev]);
+  };
+
+  const loadSnapshot = (snapshot: ScenarioSnapshot) => {
+    setWhatIfParams({ ...snapshot.parameters });
+  };
+
+  const toggleChaosState = (key: keyof ChaosSimulationState) => {
+    setChaosState((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const processHitlAction = (
+    rec: HitlRecommendation,
+    decision: "APPROVED" | "REJECTED" | "MODIFIED",
+    operatorId: string,
+    notes?: string
+  ) => {
+    const updated = processHitlDecision(rec, decision, operatorId, notes);
+    setHitlRecs((prev) => prev.map((item) => (item.id === rec.id ? updated : item)));
+  };
+
   const value: SafetyState = {
     ...state,
     activeState,
@@ -472,6 +706,57 @@ export function SafetyProvider({ children }: { children: React.ReactNode }) {
     risk,
     activeGeofences,
     pendingSyncCount,
+    simulationParams: simParams,
+    updateSimulationParams: (p) => setSimParams((prev) => ({ ...prev, ...p })),
+    digitalTwin,
+    riskForecast,
+    riskPropagation,
+    journeyState,
+    preSOSWarning,
+    locationPrivacy,
+    riskTimeline,
+    counterfactuals,
+    zonalCoverage,
+    prePositioningRecs,
+    getEvidenceGraph: (inc) => buildIncidentEvidenceGraph(inc),
+    getSimilarIncidents: (inc) => findSimilarIncidents(inc),
+    routeOperation: (opName) =>
+      routeOperationExecution(opName, {
+        status: state.online && !chaosState.cloudOutage ? "ONLINE" : "OFFLINE",
+        latencyMs: 38,
+        lastSyncTimestamp: new Date().toISOString(),
+        pendingEventsCount: state.queuedIncidents.length,
+        failedSyncAttempts: 0,
+        syncSuccessRatePercentage: 99.8,
+      }),
+    rbacPermissions,
+    activePolicies: activeSafetyPolicies,
+    policyResults,
+    confidenceAI,
+    hitlRecommendations: hitlRecs,
+    processHitlAction,
+    replayScenario: deterministicReplayScenario,
+    forensicsReport,
+    discoveredPatterns,
+    federatedLearningState,
+    modelLifecycleInfo,
+    connectivityLadder,
+    chaosState,
+    toggleChaosState,
+    resilienceResponse,
+    safetyCorridors,
+    resilienceScore,
+    nextBestActions,
+    whatIfParams,
+    updateWhatIfParams: (p) => setWhatIfParams((prev) => ({ ...prev, ...p })),
+    simulatedPrediction,
+    scenarioDeltas,
+    resourceAllocations,
+    cascadingAnalysis,
+    prioritizedIncidents,
+    scenarioSnapshots,
+    saveSnapshot,
+    loadSnapshot,
     setRole: (role) => setState((previous) => ({ ...previous, role })),
     setLanguage: (language) => setState((previous) => ({ ...previous, language })),
     setOnline: (online) => setState((previous) => ({ ...previous, online })),

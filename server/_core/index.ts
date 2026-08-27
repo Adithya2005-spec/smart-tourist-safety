@@ -28,6 +28,8 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
+import { registerRestApiRoutes } from "../routes";
+
 async function startServer() {
   const app = express();
   const server = createServer(app);
@@ -36,6 +38,7 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+  registerRestApiRoutes(app);
   // tRPC API
   app.use(
     "/api/trpc",

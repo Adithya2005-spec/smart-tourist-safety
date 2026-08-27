@@ -8,6 +8,7 @@ import { SafetyProvider } from "./contexts/SafetyContext";
 import AuthorityAnalytics from "./pages/AuthorityAnalytics";
 import AuthorityAudit from "./pages/AuthorityAudit";
 import AuthorityCommand from "./pages/AuthorityCommand";
+import AuthorityDigitalTwin from "./pages/AuthorityDigitalTwin";
 import AuthorityIncidents from "./pages/AuthorityIncidents";
 import AuthorityRisk from "./pages/AuthorityRisk";
 import AuthorityTourists from "./pages/AuthorityTourists";
@@ -46,6 +47,7 @@ function Router() {
       <Route path={"/tourist/location"} component={TouristLocation} />
       <Route path={"/tourist/settings"} component={TouristSettings} />
       <Route path={"/authority"} component={AuthorityCommand} />
+      <Route path={"/authority/digital-twin"} component={AuthorityDigitalTwin} />
       <Route path={"/authority/incidents"} component={AuthorityIncidents} />
       <Route path={"/authority/tourists"} component={AuthorityTourists} />
       <Route path={"/authority/risk"} component={AuthorityRisk} />

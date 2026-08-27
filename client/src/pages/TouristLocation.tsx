@@ -1,10 +1,10 @@
 import { SafetyNotice, SafetyShell } from "@/components/SafetyShell";
 import { useSafety } from "@/contexts/SafetyContext";
-import { Clock3, MapPin, MapPinned, RadioTower, ShieldCheck, StopCircle } from "lucide-react";
+import { Clock3, MapPin, MapPinned, RadioTower, ShieldCheck, StopCircle, Lock, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
 export default function TouristLocation() {
-  const { contacts, sharingUntil, startSharing, stopSharing, locationName, activeState } = useSafety();
+  const { contacts, sharingUntil, startSharing, stopSharing, locationName, activeState, locationPrivacy, location } = useSafety();
   const [contactId, setContactId] = useState(
     contacts.find((contact) => contact.primary)?.id ?? contacts[0]?.id ?? "",
   );
@@ -12,7 +12,35 @@ export default function TouristLocation() {
   const contact = contacts.find((item) => item.id === contactId);
 
   return (
-    <SafetyShell eyebrow="Traveller workspace" title="Live location sharing">
+    <SafetyShell eyebrow="Traveller workspace" title="Live location & privacy lifecycle">
+      {/* Privacy Lifecycle Header Card */}
+      <div className="mb-5 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-cyan-100 dark:bg-cyan-950 text-cyan-800 dark:text-cyan-300 font-bold">
+            <Lock className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
+                PRIVACY LIFECYCLE MODE
+              </span>
+              <span className="rounded-full bg-cyan-100 dark:bg-cyan-950 border border-cyan-300 dark:border-cyan-700 px-2.5 py-0.5 text-[10px] font-black text-cyan-900 dark:text-cyan-300">
+                {locationPrivacy.currentMode} MODE
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Purpose: {locationPrivacy.purpose}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <span>Retention: {locationPrivacy.retentionWindowHours} Hours</span>
+          <span>•</span>
+          <span>Coarse Coordinates: {locationPrivacy.coarseCoordinates?.lat}, {locationPrivacy.coarseCoordinates?.lng}</span>
+        </div>
+      </div>
+
       <div className="mx-auto grid max-w-5xl gap-5 lg:grid-cols-[1.1fr_.9fr]">
         <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm text-slate-900 dark:text-slate-100">
           <div className="flex items-start justify-between">
@@ -121,7 +149,7 @@ export default function TouristLocation() {
             <div className="flex gap-3">
               <Clock3 className="h-5 w-5 shrink-0 text-cyan-600 dark:text-cyan-400" />
               <p className="text-xs">
-                <strong>Zero Uncontrolled Tracking:</strong> Location sharing is explicit, strictly opt-in, and auto-expires to safeguard tourist privacy rights.
+                <strong>Zero Uncontrolled Tracking:</strong> Exact location is processed only when SOS is active. Analytics historical records use coarse rounded geohash grids to preserve user privacy.
               </p>
             </div>
           </SafetyNotice>

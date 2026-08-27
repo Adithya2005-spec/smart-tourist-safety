@@ -48,9 +48,12 @@ const touristNav: NavItem[] = [
   { href: "/tourist/settings", label: "Settings", icon: Settings },
 ];
 
+import { Box } from "lucide-react";
+
 const authorityNav: NavItem[] = [
   { href: "/authority", label: "Command centre", icon: LayoutDashboard },
-  { href: "/pan-india", label: "Pan-India Directory", icon: Globe2, highlight: true },
+  { href: "/authority/digital-twin", label: "Digital Twin & Simulator", icon: Box, highlight: true },
+  { href: "/pan-india", label: "Pan-India Directory", icon: Globe2 },
   { href: "/authority/incidents", label: "Incident queue", icon: Siren },
   { href: "/authority/tourists", label: "Tourists", icon: UsersRound },
   { href: "/authority/risk", label: "Risk zones", icon: Gauge },

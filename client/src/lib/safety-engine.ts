@@ -1,5 +1,19 @@
-export type RiskBand = "SAFE" | "CAUTION" | "DANGER";
-export type IncidentStatus = "CREATED" | "VERIFIED" | "ASSIGNED" | "RESPONDING" | "RESOLVED";
+export type SeverityBand = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+export type RiskBand = SeverityBand | "SAFE" | "CAUTION" | "DANGER";
+
+export type IncidentStatus = 
+  | "SOS_CREATED" 
+  | "ACKNOWLEDGED" 
+  | "RESPONDER_ASSIGNED" 
+  | "RESPONDER_EN_ROUTE" 
+  | "ON_SCENE" 
+  | "RESOLVED" 
+  | "VERIFIED"
+  // Legacy aliases for backwards compatibility
+  | "CREATED"
+  | "ASSIGNED"
+  | "RESPONDING";
+
 export type IncidentType = "Medical" | "Harassment" | "Lost" | "Suspicious activity" | "Other";
 
 export type GeoPoint = { lat: number; lng: number };
@@ -10,8 +24,10 @@ export type RiskZone = {
   center: GeoPoint;
   radiusM: number;
   score: number;
+  severity: SeverityBand;
   band: RiskBand;
   incidentCount: number;
+  trendPercentage?: number;
   updatedAt: string;
   factor: string;
 };
@@ -20,33 +36,45 @@ export type Responder = {
   id: string;
   name: string;
   specialty: string;
-  availability: "AVAILABLE" | "BUSY";
+  availability: "AVAILABLE" | "BUSY" | "OFFLINE";
   eta: string;
+  activeAssignments: number;
+  currentLocation?: GeoPoint;
+  phone?: string;
 };
 
 export type AuditEntry = {
   id: string;
   actor: string;
+  actorType?: "TOURIST" | "AUTHORITY" | "RESPONDER" | "SYSTEM";
   action: string;
   detail: string;
   at: string;
   hash?: string;
-  integrity?: "VERIFIED" | "PENDING";
+  previousHash?: string;
+  transactionId?: string;
+  integrity?: "VERIFIED" | "TAMPERED" | "PENDING";
 };
 
 export type Incident = {
   id: string;
   type: IncidentType;
-  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  severity: SeverityBand;
+  priorityScore: number;
   status: IncidentStatus;
   location: string;
   coordinate: GeoPoint;
   riskScore: number;
   createdAt: string;
+  acknowledgedAt?: string;
+  assignedAt?: string;
+  enRouteAt?: string;
+  onSceneAt?: string;
+  resolvedAt?: string;
+  verifiedAt?: string;
   touristId: string;
   responderId?: string;
   responderName?: string;
-  resolvedAt?: string;
   notes?: string;
   audit: AuditEntry[];
 };
@@ -68,24 +96,43 @@ export type TravelProfile = {
   verification: "VERIFIED" | "PENDING";
 };
 
+export type RiskFactorImpact = {
+  factor: string;
+  impact: number;
+};
+
 export type RiskFeatures = {
+  location?: GeoPoint;
   historicalIncidentCount: number;
   recentIncidentCount: number;
   severity: number;
   touristDensity: number;
   hour: number;
   historicalRisk: number;
+  weatherCondition?: "CLEAR" | "RAIN" | "HEAVY_STORM" | "FOG";
+  activeNearbyIncidents?: number;
+  routeDeviation?: boolean;
 };
 
 export type RiskPrediction = {
   score: number;
-  band: RiskBand;
-  factors: string[];
+  severity: SeverityBand;
+  band: SeverityBand;
+  factors: RiskFactorImpact[];
   method: string;
+  dataClassification: "DEMO_SYNTHETIC" | "HISTORICAL_REFERENCE" | "LIVE_USER_EVENT";
+  timestamp: string;
 };
 
 export interface RiskPredictionService {
   predict(features: RiskFeatures): RiskPrediction;
+}
+
+export function getSeverityBand(score: number): SeverityBand {
+  if (score >= 75) return "CRITICAL";
+  if (score >= 50) return "HIGH";
+  if (score >= 25) return "MEDIUM";
+  return "LOW";
 }
 
 export function haversineDistanceM(a: GeoPoint, b: GeoPoint): number {
@@ -107,32 +154,45 @@ export function evaluateGeofences(location: GeoPoint, zones: RiskZone[]) {
     .sort((a, b) => b.zone.score - a.zone.score);
 }
 
-function calculateSyntheticRisk(features: RiskFeatures): RiskPrediction {
-  // Deterministic linear-regression-inspired prototype model. Training inputs are synthetic only.
-  const raw =
-    9 +
-    features.historicalIncidentCount * 0.8 +
-    features.recentIncidentCount * 2.6 +
-    features.severity * 3.1 +
-    features.touristDensity * 0.9 +
-    Math.max(0, 22 - Math.abs(features.hour - 22)) * 0.38 +
-    features.historicalRisk * 0.22;
-  const score = Math.max(0, Math.min(100, Math.round(raw)));
-  const band: RiskBand = score >= 70 ? "DANGER" : score >= 40 ? "CAUTION" : "SAFE";
-  const factors = [
-    features.recentIncidentCount >= 4 ? "Recent incident activity" : "Low recent incident activity",
-    features.severity >= 6 ? "Elevated incident severity" : "Moderate incident severity",
-    features.touristDensity >= 6 ? "High tourist density" : "Normal tourist density",
+export function calculateContextualRisk(features: RiskFeatures): RiskPrediction {
+  const locImpact = Math.min(30, Math.round(features.historicalRisk * 0.3));
+  const tempImpact = Math.round(Math.max(0, 22 - Math.abs(features.hour - 22)) * 1.1);
+  const envImpact = features.weatherCondition === "HEAVY_STORM" ? 18 : features.weatherCondition === "RAIN" ? 8 : 2;
+  const incidentImpact = Math.min(35, features.recentIncidentCount * 4 + (features.activeNearbyIncidents || 0) * 6);
+  const crowdImpact = Math.min(15, features.touristDensity * 1.5);
+  const deviationImpact = features.routeDeviation ? 12 : 0;
+
+  const rawScore = locImpact + tempImpact + envImpact + incidentImpact + crowdImpact + deviationImpact;
+  const score = Math.max(0, Math.min(100, Math.round(rawScore)));
+  const severity = getSeverityBand(score);
+
+  const factors: RiskFactorImpact[] = [
+    { factor: "Historical zone incidents", impact: locImpact },
+    { factor: features.hour >= 20 || features.hour <= 5 ? "Late night temporal factor" : "Daytime temporal factor", impact: tempImpact },
+    { factor: "Active nearby incident proximity", impact: incidentImpact },
+    { factor: "Crowd density exposure", impact: crowdImpact },
+    { factor: "Weather/environmental condition", impact: envImpact },
   ];
-  return { score, band, factors, method: "Synthetic linear-risk model" };
+
+  if (deviationImpact > 0) {
+    factors.push({ factor: "Route deviation detected", impact: deviationImpact });
+  }
+
+  factors.sort((a, b) => b.impact - a.impact);
+
+  return {
+    score,
+    severity,
+    band: severity,
+    factors,
+    method: "Contextual Multi-Factor Safety Engine",
+    dataClassification: "DEMO_SYNTHETIC",
+    timestamp: new Date().toISOString(),
+  };
 }
 
-/**
- * Explicit local model boundary. A validated remote or on-device model can replace this service
- * without changing the caller contract or the UI's explanation behaviour.
- */
 export const localRiskPredictionService: RiskPredictionService = {
-  predict: calculateSyntheticRisk,
+  predict: calculateContextualRisk,
 };
 
 export function predictRisk(features: RiskFeatures): RiskPrediction {
@@ -143,60 +203,79 @@ export function makeId(prefix: string) {
   return `${prefix}-${Math.floor(1000 + Math.random() * 9000)}`;
 }
 
-export function incidentTransitionLabel(status: IncidentStatus) {
-  const labels: Record<IncidentStatus, string> = {
-    CREATED: "Incident created",
-    VERIFIED: "Incident acknowledged and verified",
-    ASSIGNED: "Responder assigned",
-    RESPONDING: "Responder en route",
-    RESOLVED: "Incident resolved",
+export function incidentTransitionLabel(status: IncidentStatus): string {
+  const labels: Record<string, string> = {
+    SOS_CREATED: "Emergency SOS triggered",
+    CREATED: "Emergency SOS triggered",
+    ACKNOWLEDGED: "Incident acknowledged by Authority Operator",
+    VERIFIED: "Incident acknowledged by Authority Operator",
+    RESPONDER_ASSIGNED: "Optimal responder unit assigned",
+    ASSIGNED: "Optimal responder unit assigned",
+    RESPONDER_EN_ROUTE: "Responder unit dispatched & en route",
+    RESPONDING: "Responder unit dispatched & en route",
+    ON_SCENE: "Responder arrived on scene",
+    RESOLVED: "Incident safely resolved",
+    VERIFIED_AUDIT: "Chained audit integrity verified",
   };
-  return labels[status];
+  return labels[status] || status;
 }
 
-export function canTransition(from: IncidentStatus, to: IncidentStatus) {
-  const transitions: Record<IncidentStatus, IncidentStatus[]> = {
-    CREATED: ["VERIFIED"],
-    VERIFIED: ["ASSIGNED"],
-    ASSIGNED: ["RESPONDING"],
-    RESPONDING: ["RESOLVED"],
-    RESOLVED: [],
+export function canTransition(from: IncidentStatus, to: IncidentStatus): boolean {
+  const transitions: Record<string, string[]> = {
+    SOS_CREATED: ["ACKNOWLEDGED", "VERIFIED"],
+    CREATED: ["ACKNOWLEDGED", "VERIFIED"],
+    ACKNOWLEDGED: ["RESPONDER_ASSIGNED", "ASSIGNED"],
+    VERIFIED_STAGE: ["RESPONDER_ASSIGNED", "ASSIGNED"],
+    RESPONDER_ASSIGNED: ["RESPONDER_EN_ROUTE", "RESPONDING"],
+    ASSIGNED: ["RESPONDER_EN_ROUTE", "RESPONDING"],
+    RESPONDER_EN_ROUTE: ["ON_SCENE"],
+    RESPONDING: ["ON_SCENE"],
+    ON_SCENE: ["RESOLVED"],
+    RESOLVED: ["VERIFIED"],
+    VERIFIED: [],
   };
-  return transitions[from].includes(to);
+  return transitions[from]?.includes(to) ?? false;
 }
 
-export function validateAuditTrail(entries: AuditEntry[]) {
-  if (entries.length === 0) return false;
-  return entries.every((entry, index) => {
-    const timestamp = Date.parse(entry.at);
-    const priorTimestamp = index === 0 ? Number.NEGATIVE_INFINITY : Date.parse(entries[index - 1].at);
-    return Boolean(entry.id && entry.actor && entry.action && entry.detail) && !Number.isNaN(timestamp) && timestamp >= priorTimestamp;
-  });
+export function calculateIncidentPriority(
+  severity: SeverityBand,
+  riskScore: number,
+  type: IncidentType,
+  minutesElapsed: number
+): number {
+  const severityWeight = severity === "CRITICAL" ? 45 : severity === "HIGH" ? 35 : severity === "MEDIUM" ? 20 : 10;
+  const typeWeight = type === "Medical" ? 25 : type === "Harassment" ? 20 : type === "Suspicious activity" ? 15 : 10;
+  const timeWeight = Math.min(15, minutesElapsed * 1.5);
+  const score = Math.round(severityWeight + (riskScore * 0.25) + typeWeight + timeWeight);
+  return Math.max(0, Math.min(100, score));
 }
 
 export function synchronizeQueuedIncidents(queuedIncidents: Incident[], synchronizedAt = new Date().toISOString()) {
   return queuedIncidents.map((incident) => ({
     ...incident,
+    status: incident.status === "CREATED" ? "SOS_CREATED" as const : incident.status,
     audit: [
-      ...incident.audit.map((entry) => entry.action === "PENDING_SYNC" ? { ...entry, action: "EDGE_CAPTURED", detail: "SOS captured locally while offline" } : entry),
-      { id: makeId("AUD"), actor: "EDGE-SYNC", action: "CREATED", detail: "Queued SOS synchronized with command centre", at: synchronizedAt },
+      ...incident.audit.map((entry) => entry.action === "PENDING_SYNC" ? { ...entry, action: "EDGE_CAPTURED", detail: "SOS captured locally in edge storage while offline" } : entry),
+      { id: makeId("AUD"), actor: "EDGE-SYNC", actorType: "SYSTEM" as const, action: "SYNCHRONIZED", detail: "Queued SOS synchronized with central command platform", at: synchronizedAt },
     ],
   }));
 }
 
-export function assistantReply(question: string, risk: RiskPrediction, zones: RiskZone[]) {
+export function assistantReply(question: string, risk: RiskPrediction, zones: RiskZone[]): string {
   const query = question.toLowerCase();
-  const safeZone = zones.find((zone) => zone.band === "SAFE");
+  const safeZone = zones.find((zone) => zone.severity === "LOW" || zone.band === "SAFE");
+
   if (query.includes("safe") || query.includes("route")) {
-    return `The nearest lower-risk option is **${safeZone?.name ?? "the designated safe zone"}**. The prototype safer route is 2.6 km and has an estimated **${safeZone?.band ?? "SAFE"}** risk. It is slightly longer than the fastest route but avoids the highest-risk area.`;
+    return `The safest path toward **${safeZone?.name ?? "Designated Safe Zone"}** avoids 2 high-activity dynamic risk zones. Estimated risk is **${risk.severity} (${risk.score}/100)**. Route comparison selects the safer detour over the direct high-risk corridor.`;
   }
   if (query.includes("emergency") || query.includes("sos") || query.includes("help")) {
-    return "If you feel unsafe, press **SOS**. The edge safety layer records your last known location and risk context immediately. If offline, it queues the alert securely on this device for synchronization when connectivity returns. For immediate life-threatening danger, contact local emergency services.";
+    return "Press **SOS** immediately to alert the Authority Command Center. If offline, your SOS and GPS coordinates will be stored safely in IndexedDB and synchronized automatically once network is restored.";
   }
   if (query.includes("why") || query.includes("risk")) {
-    return `The current contextual risk is **${risk.band} (${risk.score}/100)**. Contributing factors include ${risk.factors.map((factor) => factor.toLowerCase()).join(", ")}. This prototype uses transparent synthetic demonstration inputs rather than validated public safety data.`;
+    const factorList = risk.factors.map((f) => `• ${f.factor} (+${f.impact} pts)`).join("\n");
+    return `Your contextual risk is **${risk.severity} (${risk.score}/100)**.\n\nKey Contributing Factors:\n${factorList}\n\n[Data Source: ${risk.dataClassification}]`;
   }
-  return `I am your local Guardian AI safety assistant. Your current contextual risk is **${risk.band} (${risk.score}/100)**. Ask why an area is risky, request a safer route, or ask what to do in an emergency.`;
+  return `I am Guardian AI, your safety assistant. Current risk: **${risk.severity} (${risk.score}/100)**. Ask why your current location is risky, request a safer route, or ask how offline SOS backup works.`;
 }
 
 export async function sha256(value: string): Promise<string> {

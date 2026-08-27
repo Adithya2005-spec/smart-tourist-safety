@@ -1,10 +1,10 @@
 import { RiskBadge, SafetyNotice, SafetyShell } from "@/components/SafetyShell";
+import { IncidentTimeline } from "@/components/IncidentTimeline";
 import { useSafety } from "@/contexts/SafetyContext";
 import {
   AlertTriangle,
   CheckCircle2,
   Clock3,
-  Globe2,
   MapPin,
   MapPinned,
   PhoneCall,
@@ -33,7 +33,7 @@ export default function TouristSOS() {
   return (
     <SafetyShell eyebrow="Traveller workspace" title="SOS Emergency Command">
       {created ? (
-        <div className="mx-auto max-w-2xl rounded-3xl border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-900 p-6 sm:p-9 shadow-xl shadow-emerald-900/5 text-slate-900 dark:text-slate-100">
+        <div className="mx-auto max-w-2xl rounded-3xl border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-900 p-6 sm:p-9 shadow-xl text-slate-900 dark:text-slate-100">
           <div className="grid h-14 w-14 place-items-center rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
             <CheckCircle2 className="h-7 w-7" />
           </div>
@@ -41,15 +41,37 @@ export default function TouristSOS() {
             {online ? "Incident Broadcasted to Command Centre" : "SOS Stored in Local Edge Queue"}
           </p>
           <h2 className="mt-1 text-3xl font-black text-slate-950 dark:text-white">{created}</h2>
-          <p className="mt-3 max-w-lg text-sm leading-6 text-slate-600 dark:text-slate-300">
+
+          <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
             {online
-              ? `Your emergency alert is active in the ${activeState.name} command centre with responder dispatch and hash audit enabled.`
-              : "Your safety request is stored encrypted in your local edge queue and will automatically dispatch as soon as connectivity resumes."}
+              ? `Emergency alert is live in the ${activeState.name} command centre.`
+              : "Emergency event saved locally in IndexedDB. It will be transmitted automatically when connectivity is restored."}
           </p>
+
+          <div className="mt-6 border-t border-slate-100 dark:border-slate-800 pt-6">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">
+              Incident Lifecycle & Event Audit
+            </h3>
+            <IncidentTimeline
+              currentStatus={online ? "SOS_CREATED" : "CREATED"}
+              auditTrail={[
+                {
+                  id: "AUD-101",
+                  actor: profile.touristId,
+                  actorType: "TOURIST",
+                  action: online ? "SOS_CREATED" : "PENDING_SYNC",
+                  detail: online
+                    ? `Emergency alert created and broadcasted to ${activeState.name} Command Platform.`
+                    : "Emergency alert saved locally in IndexedDB offline queue on device.",
+                  at: new Date().toISOString(),
+                },
+              ]}
+            />
+          </div>
 
           <div className="mt-7 grid gap-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 p-4 sm:grid-cols-3 border border-slate-100 dark:border-slate-800">
             <Data label="Tourist ID" value={profile.touristId} />
-            <Data label="Contextual Risk" value={`${risk.score}/100 · ${risk.band}`} />
+            <Data label="Contextual Risk" value={`${risk.score}/100 · ${risk.severity || risk.band}`} />
             <Data label="Active Territory" value={`${activeState.name}`} />
           </div>
 
@@ -183,7 +205,7 @@ export default function TouristSOS() {
                     <p className="mt-1 text-xs leading-5">
                       {online
                         ? `Live dispatch coordinates with ${activeState.name} Tourist Security Team and audit trails.`
-                        : "Cached risk zones and local SOS queue active. Synchronizes automatically when edge connection restores."}
+                        : "Emergency event saved locally in IndexedDB. It will be transmitted automatically when connectivity is restored."}
                     </p>
                   </div>
                 </div>
@@ -214,7 +236,7 @@ export default function TouristSOS() {
 
                   <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3">
                     <span className="font-semibold text-slate-600 dark:text-slate-400">Contextual Risk</span>
-                    <RiskBadge score={risk.score} band={risk.band} />
+                    <RiskBadge score={risk.score} band={risk.severity || risk.band} />
                   </div>
                 </div>
               </div>
