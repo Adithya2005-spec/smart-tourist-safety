@@ -8,7 +8,6 @@
 ![Digital Twin](https://img.shields.io/badge/Engine-Safety%20Digital%20Twin-purple?style=for-the-badge)
 ![Resilience](https://img.shields.io/badge/Resilience-Offline%20Edge%20%2B%20Fault%20Tolerant-emerald?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey?style=for-the-badge)
-
 <br/>
 
 **Suraksha Link** is an AI-powered, resilient, offline-first tourist safety platform featuring a **Safety Digital Twin**, **What-If Simulation Engine**, **Pan-India 36 State/UT Explorer**, **Chaos Simulator**, **Human-in-the-Loop (HITL) Governance**, **Incident Replay & Forensics**, and **Blockchain-Anchored Audit Trail**.
