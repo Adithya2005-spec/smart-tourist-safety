@@ -3,7 +3,7 @@
 <div align="center">
 
 ![Status](https://img.shields.io/badge/Status-Live%20Production%20Grade-success?style=for-the-badge&logoColor=white)
-![Hackathon](https://img.shields.io/badge/Smart%20India%20Hackathon-2024--2026-blue?style=for-the-badge)
+![Hackathon](https://img.shields.io/badge/Smart%20India%20Hackathon-2026-blue?style=for-the-badge)
 ![Coverage](https://img.shields.io/badge/Coverage-36%20States%20%2B%20UTs-orange?style=for-the-badge)
 ![Digital Twin](https://img.shields.io/badge/Engine-Safety%20Digital%20Twin-purple?style=for-the-badge)
 ![Resilience](https://img.shields.io/badge/Resilience-Offline%20Edge%20%2B%20Fault%20Tolerant-emerald?style=for-the-badge)
