@@ -217,7 +217,7 @@ pnpm run build
 
 ## 📄 License
 
-MIT License © 2024–2026 — Adithya & Team
+MIT License © 2026 — Adithya & Team
 
 <div align="center">
   Built with ❤️ for Smart Tourist Safety & Resilience
