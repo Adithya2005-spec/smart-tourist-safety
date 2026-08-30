@@ -26,6 +26,8 @@ import TouristSOS from "./pages/TouristSOS";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import PanIndiaExplorer from "./pages/PanIndiaExplorer";
+import AuthorityIntelligence from "./pages/AuthorityIntelligence";
+import ModelLab from "./pages/ModelLab";
 
 function Router() {
   return (
@@ -53,6 +55,8 @@ function Router() {
       <Route path={"/authority/risk"} component={AuthorityRisk} />
       <Route path={"/authority/analytics"} component={AuthorityAnalytics} />
       <Route path={"/authority/audit"} component={AuthorityAudit} />
+      <Route path={"/authority/intelligence"} component={AuthorityIntelligence} />
+      <Route path={"/authority/model-lab"} component={ModelLab} />
       <Route path={"/admin"} component={AdminOversight} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
