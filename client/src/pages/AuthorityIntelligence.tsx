@@ -5,6 +5,8 @@ import { IncidentCopilot } from "@/components/IncidentCopilot";
 import { detectSystemAnomalies } from "@/lib/anomaly-detection-pipeline";
 import { computeTemporalRiskForecast } from "@/lib/temporal-risk-model";
 import { evaluateDataDriftAnalysis } from "@/lib/data-drift-engine";
+import { getAdaptiveBaselineState, type ModelPromotionEvaluation } from "@/lib/adaptive-baseline-engine";
+import { generateDailySafetyBrief } from "@/lib/daily-brief-generator";
 import * as liveTools from "@/lib/live-data-tools";
 import {
   Brain,
@@ -19,13 +21,17 @@ import {
   FlaskConical,
   Cpu,
   Radio,
+  FileText,
+  GitBranch,
+  UserCheck,
+  Zap,
 } from "lucide-react";
 
 function StatusBadge({ status }: { status: string }) {
   const colors =
-    status === "HEALTHY" || status === "NORMAL" || status === "VERIFIED"
+    status === "HEALTHY" || status === "NORMAL" || status === "VERIFIED" || status === "PROMOTED"
       ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
-      : status === "WARNING" || status === "UNUSUAL"
+      : status === "WARNING" || status === "UNUSUAL" || status === "PENDING_REVIEW"
       ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
       : status === "ANOMALOUS" || status === "DRIFT DETECTED" || status === "CRITICAL"
       ? "bg-rose-500/20 border-rose-500/40 text-rose-300"
@@ -82,11 +88,15 @@ export default function AuthorityIntelligence() {
     safety.incidents[0]?.id ?? null
   );
 
+  const adaptiveState = getAdaptiveBaselineState();
+  const [evalState, setEvalState] = useState<ModelPromotionEvaluation>(adaptiveState.latestEvaluation);
+  const [showBriefModal, setShowBriefModal] = useState(false);
+
+  const dailyBrief = generateDailySafetyBrief(safety.activeStateId);
   const systemHealth = liveTools.getSystemHealth();
   const modelHealth = liveTools.getModelHealth();
   const incidentStats = liveTools.getIncidentStatistics();
   const riskRes = liveTools.getCurrentRisk(undefined, safety.zones);
-  const connRes = liveTools.getConnectivityStatus(safety.online);
 
   const driftReport = evaluateDataDriftAnalysis(1420);
   const anomalies = detectSystemAnomalies(
@@ -113,11 +123,19 @@ export default function AuthorityIntelligence() {
 
   const activeIncident = safety.incidents.find((i) => i.id === selectedIncidentId);
 
+  const handlePromoteCandidate = () => {
+    setEvalState((prev) => ({
+      ...prev,
+      decision: "PROMOTED",
+      decisionRationale: "Challenger v2.2 successfully promoted to production Champion after manual MLOps approval.",
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-[#050f1a] text-white">
       {/* Page Header */}
       <div className="border-b border-white/10 bg-[#071e2e]/90 px-6 py-5">
-        <div className="mx-auto max-w-7xl flex flex-wrap items-center gap-4">
+        <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-700 shadow-lg">
               <Brain className="h-6 w-6 text-white" />
@@ -126,21 +144,77 @@ export default function AuthorityIntelligence() {
               <p className="text-[10px] font-black uppercase tracking-widest text-cyan-300">
                 SURAKSHA SAFETY INTELLIGENCE
               </p>
-              <h1 className="text-lg font-black text-white">AI Decision Support Dashboard</h1>
+              <h1 className="text-lg font-black text-white">AI Decision Support & Adaptive Intelligence Dashboard</h1>
             </div>
           </div>
 
-          <div className="ml-auto flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowBriefModal(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-3.5 py-1.5 text-xs font-black transition shadow-lg"
+            >
+              <FileText className="h-4 w-4" /> Daily Brief
+            </button>
             <StatusBadge status={systemHealth.data.status} />
             <StatusBadge status={driftReport.overallStatus} />
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-bold text-slate-300">
-              {new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST
-            </span>
           </div>
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl px-6 py-8 space-y-8">
+        {/* Daily Brief Modal */}
+        {showBriefModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+            <div className="max-w-2xl w-full rounded-3xl border border-cyan-500/30 bg-[#071e2e] p-6 space-y-4 shadow-2xl text-white">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <FileText className="h-5 w-5 text-cyan-300" />
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-cyan-300">DAILY SAFETY BRIEFING</p>
+                    <h3 className="text-base font-black">{dailyBrief.briefId}</h3>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowBriefModal(false)}
+                  className="rounded-xl bg-white/10 px-3 py-1 text-xs font-bold hover:bg-white/20"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <p className="text-slate-300 leading-relaxed">{dailyBrief.executiveSummary}</p>
+
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="rounded-xl bg-white/5 p-2.5 border border-white/10">
+                    <span className="text-[10px] text-slate-400 font-bold block">Active SOS</span>
+                    <span className="text-base font-black text-rose-300">{dailyBrief.activeIncidentsCount}</span>
+                  </div>
+                  <div className="rounded-xl bg-white/5 p-2.5 border border-white/10">
+                    <span className="text-[10px] text-slate-400 font-bold block">Resolved 24h</span>
+                    <span className="text-base font-black text-emerald-300">{dailyBrief.resolved24hCount}</span>
+                  </div>
+                  <div className="rounded-xl bg-white/5 p-2.5 border border-white/10">
+                    <span className="text-[10px] text-slate-400 font-bold block">Avg Response</span>
+                    <span className="text-base font-black text-cyan-300">{dailyBrief.averageResponseTimeMinutes} mins</span>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-white/5 p-3.5 border border-white/10 space-y-1">
+                  <p className="font-black text-cyan-300">Recommended Action Items:</p>
+                  {dailyBrief.recommendedActions.map((act, idx) => (
+                    <p key={idx} className="text-slate-300">
+                      • {act}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* KPI Summary Row */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <SummaryCard
@@ -188,6 +262,79 @@ export default function AuthorityIntelligence() {
           />
         </div>
 
+        {/* Adaptive Intelligence & Champion vs Challenger Panel */}
+        <div className="rounded-3xl border border-purple-500/30 bg-purple-500/5 p-6 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <GitBranch className="h-5 w-5 text-purple-300" />
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-purple-300">ADAPTIVE INTELLIGENCE LOOP</p>
+                <h2 className="text-base font-black text-white">Champion vs Challenger Model Promotion Evaluation</h2>
+              </div>
+            </div>
+            <StatusBadge status={evalState.decision} />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            {/* Champion Card */}
+            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-black text-emerald-300 uppercase text-[10px]">CHAMPION (PRODUCTION)</span>
+                <span className="font-mono text-white font-bold">{evalState.championVersion}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="rounded-xl bg-white/5 p-2">
+                  <span className="text-[10px] text-slate-400 block">F1 Score</span>
+                  <span className="font-black text-white text-sm">{evalState.championF1}</span>
+                </div>
+                <div className="rounded-xl bg-white/5 p-2">
+                  <span className="text-[10px] text-slate-400 block">Brier Error</span>
+                  <span className="font-black text-white text-sm">{evalState.championBrier}</span>
+                </div>
+                <div className="rounded-xl bg-white/5 p-2">
+                  <span className="text-[10px] text-slate-400 block">Latency</span>
+                  <span className="font-black text-white text-sm">{evalState.championLatencyMs}ms</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Challenger Card */}
+            <div className="rounded-2xl border border-cyan-500/30 bg-cyan-500/5 p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-black text-cyan-300 uppercase text-[10px]">CHALLENGER (VALIDATED CANDIDATE)</span>
+                <span className="font-mono text-white font-bold">{evalState.challengerVersion}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="rounded-xl bg-white/5 p-2">
+                  <span className="text-[10px] text-slate-400 block">F1 Score</span>
+                  <span className="font-black text-emerald-300 text-sm">{evalState.challengerF1} (+2.1%)</span>
+                </div>
+                <div className="rounded-xl bg-white/5 p-2">
+                  <span className="text-[10px] text-slate-400 block">Brier Error</span>
+                  <span className="font-black text-emerald-300 text-sm">{evalState.challengerBrier}</span>
+                </div>
+                <div className="rounded-xl bg-white/5 p-2">
+                  <span className="text-[10px] text-slate-400 block">Latency</span>
+                  <span className="font-black text-white text-sm">{evalState.challengerLatencyMs}ms</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs border-t border-white/10 pt-3">
+            <p className="text-slate-300 max-w-xl">{evalState.decisionRationale}</p>
+            {evalState.decision === "PENDING_REVIEW" && (
+              <button
+                type="button"
+                onClick={handlePromoteCandidate}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white px-4 py-2 font-black transition shadow-lg"
+              >
+                <UserCheck className="h-4 w-4" /> Promote Challenger to Champion
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Anomaly Alerts */}
         {anomalies.some((a) => a.classification !== "NORMAL") && (
           <div className="space-y-3">
@@ -222,33 +369,6 @@ export default function AuthorityIntelligence() {
             </div>
           </div>
         )}
-
-        {/* Temporal Forecast Panel */}
-        <div className="rounded-3xl border border-cyan-900 bg-[#071e2e] p-6 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="font-black text-white flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-cyan-300" />
-              Temporal Risk Forecast
-            </h2>
-            <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-[10px] font-black text-cyan-300">
-              {temporal.forecastTag}
-            </span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: "Current Risk", value: `${temporal.currentRisk}/100` },
-              { label: "1-Hour Forecast", value: `${temporal.forecastScore1Hour}/100` },
-              { label: "3-Hour Forecast", value: `${temporal.forecastScore3Hour}/100` },
-              { label: "Trend", value: temporal.trend },
-            ].map((item) => (
-              <div key={item.label} className="rounded-2xl bg-white/5 border border-white/10 p-3 text-center">
-                <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">{item.label}</p>
-                <p className="text-lg font-black text-white">{item.value}</p>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs text-slate-400">{temporal.forecastExplanation}</p>
-        </div>
 
         {/* Main Two-Column Layout */}
         <div className="grid gap-6 lg:grid-cols-2">
@@ -302,32 +422,6 @@ export default function AuthorityIntelligence() {
                 <span className="text-emerald-300 font-bold">All systems operational.</span>
               </div>
             )}
-
-            {/* Model Health Summary */}
-            <div className="rounded-2xl border border-purple-500/30 bg-purple-500/5 p-4 space-y-2 text-xs">
-              <p className="font-black text-purple-300 flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                Active Model Health
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-xl bg-white/5 p-2.5">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Model Version</p>
-                  <p className="font-black text-white">{modelHealth.data.version}</p>
-                </div>
-                <div className="rounded-xl bg-white/5 p-2.5">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Brier Score</p>
-                  <p className="font-black text-emerald-300">{modelHealth.data.brierScore}</p>
-                </div>
-                <div className="rounded-xl bg-white/5 p-2.5">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Feature Drift</p>
-                  <p className="font-black text-cyan-300">{modelHealth.data.driftStatus}</p>
-                </div>
-                <div className="rounded-xl bg-white/5 p-2.5">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Data Quality</p>
-                  <p className="font-black text-white">{modelHealth.data.dataQuality}</p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
