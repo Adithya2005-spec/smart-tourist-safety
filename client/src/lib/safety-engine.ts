@@ -261,6 +261,8 @@ export function synchronizeQueuedIncidents(queuedIncidents: Incident[], synchron
   }));
 }
 
+import { retrieveKnowledge } from "./rag-retriever";
+
 export function assistantReply(question: string, risk: RiskPrediction, zones: RiskZone[]): string {
   const query = question.toLowerCase();
   const safeZone = zones.find((zone) => zone.severity === "LOW" || zone.band === "SAFE");
@@ -268,14 +270,19 @@ export function assistantReply(question: string, risk: RiskPrediction, zones: Ri
   if (query.includes("safe") || query.includes("route")) {
     return `The safest path toward **${safeZone?.name ?? "Designated Safe Zone"}** avoids 2 high-activity dynamic risk zones. Estimated risk is **${risk.severity} (${risk.score}/100)**. Route comparison selects the safer detour over the direct high-risk corridor.`;
   }
-  if (query.includes("emergency") || query.includes("sos") || query.includes("help")) {
-    return "Press **SOS** immediately to alert the Authority Command Center. If offline, your SOS and GPS coordinates will be stored safely in IndexedDB and synchronized automatically once network is restored.";
-  }
   if (query.includes("why") || query.includes("risk")) {
     const factorList = risk.factors.map((f) => `• ${f.factor} (+${f.impact} pts)`).join("\n");
     return `Your contextual risk is **${risk.severity} (${risk.score}/100)**.\n\nKey Contributing Factors:\n${factorList}\n\n[Data Source: ${risk.dataClassification}]`;
   }
-  return `I am Guardian AI, your safety assistant. Current risk: **${risk.severity} (${risk.score}/100)**. Ask why your current location is risky, request a safer route, or ask how offline SOS backup works.`;
+
+  // RAG Retriever Fallback for system crash, data loss, offline edge, digital twin, blockchain, ML governance, etc.
+  const ragMatches = retrieveKnowledge(question, 1);
+  if (ragMatches.length > 0 && ragMatches[0].relevanceScore > 0) {
+    const match = ragMatches[0];
+    return `**${match.document.title}**:\n${match.document.content}\n\n[Source: Grounded RAG Knowledge Base (${match.document.id})]`;
+  }
+
+  return `I am Guardian AI, your safety assistant. Current risk: **${risk.severity} (${risk.score}/100)**. You can ask me about system crash data persistence, emergency numbers, safer route detours, offline SOS backup, or why your location is risky.`;
 }
 
 export async function sha256(value: string): Promise<string> {

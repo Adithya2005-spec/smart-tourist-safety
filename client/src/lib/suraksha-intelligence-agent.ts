@@ -54,27 +54,18 @@ export function processSurakshaIntelligenceQuery(
   const retrievedDocs = retrieveKnowledge(userQuery, 2);
   retrievedDocs.forEach((r) => sources.push(`${r.document.title} (${r.document.id})`));
 
-  // 2. General Knowledge Queries
-  if (
-    queryLower.includes("what is suraksha link") ||
-    queryLower.includes("explain edge computing") ||
-    queryLower.includes("what is geofencing") ||
-    queryLower.includes("what is f1 score") ||
-    queryLower.includes("what is blockchain") ||
-    queryLower.includes("difference between recall and precision")
-  ) {
-    if (queryLower.includes("what is suraksha link")) {
-      answer = "Suraksha Link is a production-grade, offline-first tourist safety platform built for all 36 Indian States and UTs. It integrates real-time SOS dispatch, a spatial Safety Digital Twin, What-If simulation playground, Guardian AI advisor, and a blockchain-anchored audit ledger.";
-    } else if (queryLower.includes("edge computing")) {
-      answer = "Edge computing executes telemetry processing and risk scoring locally on-device rather than routing every request to central cloud servers. This ensures zero latency for emergency SOS alerts and uninterrupted safety monitoring when cellular coverage drops.";
-    } else if (queryLower.includes("geofencing")) {
-      answer = "Geofencing creates virtual geographic boundaries around high-risk corridors. When a tourist enters a caution zone, automated on-device warnings are triggered to advise extra vigilance.";
-    } else if (queryLower.includes("f1 score") || queryLower.includes("recall and precision")) {
-      answer = "Precision measures how many flagged risk warnings were truly hazardous, while Recall measures how many total hazards were correctly identified. The F1 Score is the harmonic mean of Precision and Recall, balancing false alarms against missed emergencies.";
-    } else {
-      answer = "Blockchain in Suraksha Link generates tamper-evident SHA-256 cryptographic hashes for every incident transition and operator action, anchoring them into an immutable EVM-compatible audit log.";
-    }
-    return buildResponse(answer, [{ label: "Classification", value: "GENERAL KNOWLEDGE" }], sources.length ? sources : ["General Domain Knowledge Base"], [], mode, undefined);
+  // 2. RAG & Knowledge Queries Handling
+  if (retrievedDocs.length > 0 && retrievedDocs[0].relevanceScore >= 3) {
+    const topDoc = retrievedDocs[0].document;
+    answer = `**${topDoc.title}**:\n${topDoc.content}`;
+    return buildResponse(
+      answer,
+      [{ label: "Classification", value: topDoc.category }],
+      sources.length ? sources : ["Grounded RAG Knowledge Base"],
+      [],
+      mode,
+      undefined
+    );
   }
 
   // 3. Risk Queries
