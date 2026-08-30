@@ -3,13 +3,12 @@
 <div align="center">
 
 ![Status](https://img.shields.io/badge/Status-Live%20Production%20Grade-success?style=for-the-badge&logoColor=white)
-![Hackathon](https://img.shields.io/badge/Smart%20India%20Hackathon-2024--2026-blue?style=for-the-badge)
+![Hackathon](https://img.shields.io/badge/Smart%20India%20Hackathon-2026-blue?style=for-the-badge)
 ![Coverage](https://img.shields.io/badge/Coverage-36%20States%20%2B%20UTs-orange?style=for-the-badge)
 ![Digital Twin](https://img.shields.io/badge/Engine-Safety%20Digital%20Twin-purple?style=for-the-badge)
 ![AI Reasoning](https://img.shields.io/badge/Intelligence-RAG%20%2B%20Grounded%20Reasoning-cyan?style=for-the-badge)
 ![Resilience](https://img.shields.io/badge/Resilience-Offline%20Edge%20%2B%20Fault%20Tolerant-emerald?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey?style=for-the-badge)
-
 <br/>
 
 **Suraksha Link** is a domain-specialized, offline-first AI Safety Intelligence and Decision Support Platform for India's 36 States and UTs. It features a **Safety Digital Twin**, **RAG Knowledge Base & Retriever**, **18 Live Controlled Data Tools**, **Suraksha Intelligence Grounded Agent**, **Incident Copilot**, **Isolation Forest Anomaly Engine**, **Model Lab & Registry**, **Temporal Risk Forecasting**, and **Blockchain-Anchored Audit Trail**.
@@ -150,4 +149,44 @@ pnpm run build
 
 ## 📜 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+### 1. Safety Digital Twin & What-If Simulation Engine
+1. Select **Command Responder** role from the top-right role switcher.
+2. Navigate to **Digital Twin & Simulator** from the sidebar (`/authority/digital-twin`).
+3. Under **Live Twin State**, toggle map layer switches (*Heatmap*, *Responders*, *Incidents*, *Infrastructure*, *Connectivity*).
+4. Switch to **What-If Simulation**:
+   - Drag **Tourist Density Multiplier** to `2.5x`
+   - Increase **Incident Spike Multiplier** to `3.0x`
+   - Lower **Responder Availability** to `50%`
+5. Observe real-time predicted response delays ($\Delta\text{Response Time}$), risk score changes ($\Delta\text{Risk}$), and pre-positioning recommendations.
+6. Click **Save Preset** to save the custom scenario snapshot.
+7. Switch to **System Crash & Fault Tolerance** to review edge persistence, offline queue recovery, and blockchain audit integrity details.
+
+### 2. Pan-India 36 Territory Switcher
+1. Click the **Active Territory** dropdown in the top bar or sidebar.
+2. Select **Goa (GA)** or **Ladakh (LA)**.
+3. Observe how emergency helplines, police contact numbers, advisories, do's & don'ts, and local risk zones dynamically update across the entire portal.
+
+### 3. Next Best Action & Human-in-the-Loop Review
+1. Navigate to **Command Centre** (`/authority`).
+2. View **Next Best Action Engine** recommendations.
+3. Click **Review & Approve** on a pending recommendation to launch the **HitlDecisionModal**.
+4. Enter approval rationale notes and click **Approve Action**.
+
+### 4. Incident Replay & Chaos Simulator
+1. Click **Replay Incident Lifecycle** on the Command Centre page to launch the interactive playback player.
+2. Toggle cloud outage or responder unavailability in the **Chaos Simulator Panel** to evaluate real-time resilience responses.
+
+### 5. Tourist Safety Portal & Offline SOS
+1. Switch role to **Tourist View**.
+2. Go to **SOS Centre** $\rightarrow$ Click **Emergency SOS**.
+3. Toggle connection to **Go Offline** in the header to observe the local edge queue holding the SOS alert safely until connection is restored.
+
+---
+
+## 📄 License
+
+MIT License © 2026 — Adithya & Team
+
+<div align="center">
+  Built with ❤️ for Smart Tourist Safety & Resilience
+</div>
