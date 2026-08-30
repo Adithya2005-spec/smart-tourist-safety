@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { evaluateModelComparisonPipeline, type ModelEvaluationMetrics } from "@/lib/advanced-ml-pipeline";
+import { evaluateModelComparisonPipeline } from "@/lib/advanced-ml-pipeline";
 import { getModelRegistryRecords, type ModelRegistryRecord } from "@/lib/model-registry";
 import { evaluateDataDriftAnalysis } from "@/lib/data-drift-engine";
 import { getMLDatasetPipelineMetadata } from "@/lib/dataset-pipeline";
-import { FlaskConical, TrendingUp, ShieldCheck, Database } from "lucide-react";
+import { generateLoRAFinetuningDataset, exportDatasetToJSONL } from "@/lib/lora-finetuning-exporter";
+import { anchorIncidentToEVMLedger, verifyEVMTamperProof, SURAKSHA_AUDIT_CONTRACT_ADDRESS, type EVMBlockchainTransaction } from "@/lib/evm-blockchain-anchor";
+import { FlaskConical, TrendingUp, ShieldCheck, Database, Cpu, Download, Lock, CheckCircle2, FileText, Code2 } from "lucide-react";
 
 function MetricCard({ label, value, tag, tone = "default" }: {
   label: string;
@@ -85,10 +87,35 @@ function ModelCard({ record, isActive }: { record: ModelRegistryRecord; isActive
 }
 
 export default function ModelLab() {
-  const [activeTab, setActiveTab] = useState<"REGISTRY" | "DRIFT" | "PIPELINE">("REGISTRY");
+  const [activeTab, setActiveTab] = useState<"REGISTRY" | "DRIFT" | "PIPELINE" | "FINETUNING" | "EVM_AUDIT">("REGISTRY");
   const models = getModelRegistryRecords();
   const drift = evaluateDataDriftAnalysis(1420);
   const pipelineMeta = getMLDatasetPipelineMetadata();
+  const loraDataset = generateLoRAFinetuningDataset();
+
+  const [evmTx, setEvmTx] = useState<EVMBlockchainTransaction | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationResult, setVerificationResult] = useState<string | null>(null);
+
+  const handleAnchorEVM = async () => {
+    setIsVerifying(true);
+    const tx = await anchorIncidentToEVMLedger("INC-1042", "DISPATCH_CONFIRMED", "Tourist Police Unit R01 dispatched to MG Road");
+    setEvmTx(tx);
+    const res = await verifyEVMTamperProof(tx, "INC-1042", "DISPATCH_CONFIRMED", "Tourist Police Unit R01 dispatched to MG Road");
+    setVerificationResult(res.explanation);
+    setIsVerifying(false);
+  };
+
+  const handleDownloadJSONL = () => {
+    const jsonlContent = exportDatasetToJSONL(loraDataset);
+    const blob = new Blob([jsonlContent], { type: "application/jsonlines" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `suraksha_lora_finetuning_${Date.now()}.jsonl`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const deployedModel = models.find((m) => m.status === "DEPLOYED");
 
@@ -96,6 +123,8 @@ export default function ModelLab() {
     { id: "REGISTRY" as const, label: "Model Registry", icon: <FlaskConical className="h-4 w-4" /> },
     { id: "DRIFT" as const, label: "Feature Drift Monitor", icon: <TrendingUp className="h-4 w-4" /> },
     { id: "PIPELINE" as const, label: "Dataset Pipeline", icon: <Database className="h-4 w-4" /> },
+    { id: "FINETUNING" as const, label: "LoRA Fine-Tuning Exporter", icon: <Cpu className="h-4 w-4" /> },
+    { id: "EVM_AUDIT" as const, label: "EVM Audit Anchor", icon: <Lock className="h-4 w-4" /> },
   ];
 
   return (
@@ -109,7 +138,7 @@ export default function ModelLab() {
             </div>
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-purple-300">SURAKSHA MODEL LAB</p>
-              <h1 className="text-lg font-black text-white">AI/ML Observatory & Governance Center</h1>
+              <h1 className="text-lg font-black text-white">AI/ML Observatory & Fine-Tuning Governance</h1>
             </div>
           </div>
 
@@ -230,6 +259,130 @@ export default function ModelLab() {
             <div className="rounded-2xl border border-cyan-500/30 bg-cyan-500/5 p-4 text-xs text-cyan-200">
               <p className="font-black mb-1">🔒 Temporal Leakage Protection Active</p>
               <p className="text-slate-300">Pipeline enforces strict chronological split — training data only contains samples from before the test cutoff timestamp.</p>
+            </div>
+          </div>
+        )}
+
+        {/* FINETUNING Tab */}
+        {activeTab === "FINETUNING" && (
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-purple-300">LoRA / QLoRA PEFT PIPELINE</p>
+                <h2 className="text-lg font-black text-white">Domain Fine-Tuning Dataset & Hyperparameters</h2>
+              </div>
+              <button
+                type="button"
+                onClick={handleDownloadJSONL}
+                className="inline-flex items-center gap-2 rounded-xl bg-purple-500 hover:bg-purple-400 text-white px-4 py-2 text-xs font-black transition shadow-lg"
+              >
+                <Download className="h-4 w-4" /> Download JSONL Dataset ({loraDataset.totalPairsCount} Pairs)
+              </button>
+            </div>
+
+            {/* Hyperparameters Card */}
+            <div className="rounded-3xl border border-purple-500/30 bg-purple-500/5 p-5 space-y-3">
+              <h3 className="text-xs font-black uppercase text-purple-300 flex items-center gap-2">
+                <Code2 className="h-4 w-4" /> Configured LoRA Hyperparameters
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="rounded-xl bg-white/5 p-3">
+                  <span className="text-[10px] text-slate-400 font-bold block mb-1">Base Model</span>
+                  <span className="font-mono text-white font-bold">{loraDataset.hyperparameters.baseModel}</span>
+                </div>
+                <div className="rounded-xl bg-white/5 p-3">
+                  <span className="text-[10px] text-slate-400 font-bold block mb-1">LoRA Rank (r) / Alpha</span>
+                  <span className="font-mono text-cyan-300 font-bold">r={loraDataset.hyperparameters.loraRankR}, α={loraDataset.hyperparameters.loraAlpha}</span>
+                </div>
+                <div className="rounded-xl bg-white/5 p-3">
+                  <span className="text-[10px] text-slate-400 font-bold block mb-1">Learning Rate / Epochs</span>
+                  <span className="font-mono text-white font-bold">{loraDataset.hyperparameters.learningRate} / {loraDataset.hyperparameters.numEpochs} Epochs</span>
+                </div>
+                <div className="rounded-xl bg-white/5 p-3">
+                  <span className="text-[10px] text-slate-400 font-bold block mb-1">Target Modules</span>
+                  <span className="font-mono text-purple-300 text-[10px]">{loraDataset.hyperparameters.targetModules.slice(0, 3).join(", ")}, +4 more</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Example Training Pairs */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-black uppercase text-slate-400">Sample Instruction-Context-Response Training Pairs</h3>
+              <div className="grid gap-3 md:grid-cols-2">
+                {loraDataset.pairs.map((pair) => (
+                  <div key={pair.id} className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-purple-300 font-bold">{pair.id}</span>
+                      <span className="rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 px-2.5 py-0.5 text-[10px] font-black">
+                        {pair.category}
+                      </span>
+                    </div>
+                    <p><strong className="text-slate-300">Instruction:</strong> {pair.instruction}</p>
+                    <div className="rounded-xl bg-slate-950/60 p-2.5 font-mono text-[10px] text-slate-300 whitespace-pre-wrap border border-white/5">
+                      {pair.context}
+                    </div>
+                    <div className="rounded-xl bg-purple-950/40 p-2.5 font-mono text-[10px] text-purple-200 whitespace-pre-wrap border border-purple-500/20">
+                      {pair.response}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* EVM_AUDIT Tab */}
+        {activeTab === "EVM_AUDIT" && (
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-cyan-300">EVM SMART CONTRACT AUDIT ANCHOR</p>
+                <h2 className="text-lg font-black text-white">SHA-256 Cryptographic Block Verification</h2>
+              </div>
+              <button
+                type="button"
+                onClick={handleAnchorEVM}
+                disabled={isVerifying}
+                className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-4 py-2 text-xs font-black transition shadow-lg disabled:opacity-50"
+              >
+                <Lock className="h-4 w-4" /> {isVerifying ? "Verifying EVM Block..." : "Anchor & Verify New Incident Hash"}
+              </button>
+            </div>
+
+            <div className="rounded-3xl border border-cyan-900 bg-[#071e2e] p-6 space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase">Contract Address</p>
+                  <p className="font-mono text-cyan-300 font-bold text-sm truncate">{SURAKSHA_AUDIT_CONTRACT_ADDRESS}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase">Consensus Mechanism</p>
+                  <p className="font-bold text-white text-sm">EVM SHA-256 Tamper-Proof Audit State</p>
+                </div>
+              </div>
+
+              {evmTx && (
+                <div className="rounded-2xl border border-cyan-500/30 bg-cyan-500/10 p-4 space-y-2 font-mono text-slate-200">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                    <span className="text-emerald-400 font-bold">✓ Transaction Mined Successfully</span>
+                    <span className="text-[10px] text-slate-400">Block #{evmTx.blockNumber}</span>
+                  </div>
+                  <p><span className="text-slate-400">Tx Hash:</span> <strong className="text-cyan-300 text-[11px]">{evmTx.txHash}</strong></p>
+                  <p><span className="text-slate-400">State Hash:</span> <strong className="text-white text-[11px]">{evmTx.stateHash}</strong></p>
+                  <p><span className="text-slate-400">Gas Used:</span> <strong className="text-white">{evmTx.gasUsed} gas units</strong></p>
+                  <p><span className="text-slate-400">Network:</span> <strong className="text-white">{evmTx.networkName}</strong></p>
+                </div>
+              )}
+
+              {verificationResult && (
+                <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-4 flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-black text-white">Independent Merkle Proof Status:</p>
+                    <p className="text-slate-200 mt-0.5">{verificationResult}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
