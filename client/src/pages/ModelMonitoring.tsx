@@ -55,7 +55,7 @@ function ModelMonitoringCard({
         <p><span className="font-bold text-slate-300">Dataset File:</span> <code className="font-mono text-cyan-300">{datasetReport.datasetName}</code></p>
         <p><span className="font-bold text-slate-300">Observation Count:</span> <strong className="text-white">{datasetReport.rowCount} rows ({trainingSamples} Train / {testSamples} Test)</strong></p>
         <p><span className="font-bold text-slate-300">Target Variable:</span> <strong className="text-slate-300">{targetVariable}</strong></p>
-        <p><span className="font-bold text-slate-300">Data Provenance:</span> <span className="text-amber-300 font-bold">{datasetReport.provenance.category} — {datasetReport.provenance.description}</span></p>
+        <p><span className="font-bold text-slate-300">Data Provenance:</span> <span className="text-amber-300 font-bold">{datasetReport.provenance.category} — {datasetReport.provenance.sourceDescription}</span></p>
       </div>
 
       {/* Applicable Metrics Grid */}

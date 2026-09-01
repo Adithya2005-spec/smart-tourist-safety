@@ -43,6 +43,14 @@ import { computeRiskForecast, computeRiskPropagation } from "@/lib/risk-forecast
 import { evaluateJourneyState, evaluatePreSOSWarning, type JourneyState } from "@/lib/journey-engine";
 import { routeOperationExecution } from "@/lib/edge-cloud-engine";
 import { createLocationPrivacyPolicy, generateCoarseLocation } from "@/lib/privacy-location-engine";
+import {
+  createSOSIncident,
+  updateIncidentStatus,
+  createEmergencyContact,
+  deleteEmergencyContact,
+  createLocationShare,
+  upsertProfile,
+} from "@/lib/supabase-service";
 import { evaluateCounterfactualScenarios, generateRiskExplanationTimeline } from "@/lib/explainable-ai-engine";
 import { computeZonalCoverage, generatePrePositioningRecommendations } from "@/lib/responder-coverage-engine";
 import { buildIncidentEvidenceGraph, findSimilarIncidents } from "@/lib/knowledge-graph";
@@ -325,6 +333,14 @@ export function SafetyProvider({ children }: { children: React.ReactNode }) {
       joinedDate: new Date().toISOString().split("T")[0],
     };
 
+    upsertProfile({
+      auth_user_id: session.digitalId,
+      full_name: session.fullName,
+      email: session.email,
+      phone: session.phone,
+      role: role === "AUTHORITY" ? "authority" : role === "ADMIN" ? "admin" : "tourist",
+    }).catch((err) => console.warn("Supabase upsert profile notice:", err));
+
     setState((prev) => ({
       ...prev,
       role,
@@ -380,6 +396,14 @@ export function SafetyProvider({ children }: { children: React.ReactNode }) {
       verification: "VERIFIED",
     };
 
+    upsertProfile({
+      auth_user_id: session.digitalId,
+      full_name: session.fullName,
+      email: session.email,
+      phone: session.phone,
+      role: userData.role === "AUTHORITY" ? "authority" : userData.role === "ADMIN" ? "admin" : "tourist",
+    }).catch((err) => console.warn("Supabase upsert profile notice:", err));
+
     setState((prev) => ({
       ...prev,
       role: userData.role,
@@ -417,6 +441,16 @@ export function SafetyProvider({ children }: { children: React.ReactNode }) {
         },
       ],
     };
+
+    // Persist to Supabase PostgreSQL database
+    createSOSIncident({
+      incident_type: type,
+      description: notes || `SOS Alert triggered in ${activeState.name}`,
+      latitude: state.location.lat,
+      longitude: state.location.lng,
+      severity: incidentSev === "CRITICAL" ? "CRITICAL" : incidentSev === "HIGH" ? "HIGH" : "MEDIUM",
+    }).catch((err) => console.warn("Supabase SOS save background notice:", err));
+
     setState((previous) =>
       isOffline
         ? { ...previous, queuedIncidents: [incident, ...previous.queuedIncidents] }
@@ -426,6 +460,9 @@ export function SafetyProvider({ children }: { children: React.ReactNode }) {
   };
 
   const transitionIncident = (incidentId: string, status: IncidentStatus, actor: string, detail?: string) => {
+    const mappedStatus = status === "RESOLVED" ? "RESOLVED" : status === "VERIFIED" ? "ACKNOWLEDGED" : status === "ASSIGNED" ? "RESPONDER_ASSIGNED" : "IN_PROGRESS";
+    updateIncidentStatus(incidentId, mappedStatus).catch((err) => console.warn("Supabase update incident status notice:", err));
+
     setState((previous) => ({
       ...previous,
       incidents: previous.incidents.map((incident) => {
@@ -781,9 +818,24 @@ export function SafetyProvider({ children }: { children: React.ReactNode }) {
       }
     },
     syncQueue,
-    addContact: (contact) => setState((previous) => ({ ...previous, contacts: [...previous.contacts, { ...contact, id: makeId("CONTACT") }] })),
-    deleteContact: (id) => setState((previous) => ({ ...previous, contacts: previous.contacts.filter((contact) => contact.id !== id) })),
-    startSharing: (minutes) => setState((previous) => ({ ...previous, sharingUntil: new Date(Date.now() + minutes * 60_000).toISOString() })),
+    addContact: (contact) => {
+      createEmergencyContact({
+        user_id: state.userSession?.digitalId || "usr-demo-001",
+        name: contact.name,
+        phone: contact.phone,
+        relationship: contact.relationship,
+      }).catch((err) => console.warn("Supabase add contact notice:", err));
+      setState((previous) => ({ ...previous, contacts: [...previous.contacts, { ...contact, id: makeId("CONTACT") }] }));
+    },
+    deleteContact: (id) => {
+      deleteEmergencyContact(id).catch((err) => console.warn("Supabase delete contact notice:", err));
+      setState((previous) => ({ ...previous, contacts: previous.contacts.filter((contact) => contact.id !== id) }));
+    },
+    startSharing: (minutes) => {
+      createLocationShare(state.userSession?.digitalId || "usr-demo-001", "Trusted Emergency Contacts & Authorities", minutes / 60)
+        .catch((err) => console.warn("Supabase location share notice:", err));
+      setState((previous) => ({ ...previous, sharingUntil: new Date(Date.now() + minutes * 60_000).toISOString() }));
+    },
     stopSharing: () => setState((previous) => ({ ...previous, sharingUntil: undefined })),
     guardianReply,
   };
