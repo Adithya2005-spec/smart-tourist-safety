@@ -28,6 +28,8 @@ import SignUp from "./pages/SignUp";
 import PanIndiaExplorer from "./pages/PanIndiaExplorer";
 import AuthorityIntelligence from "./pages/AuthorityIntelligence";
 import ModelLab from "./pages/ModelLab";
+import ModelMonitoring from "./pages/ModelMonitoring";
+import RAGEvaluation from "./pages/RAGEvaluation";
 
 function Router() {
   return (
@@ -57,6 +59,8 @@ function Router() {
       <Route path={"/authority/audit"} component={AuthorityAudit} />
       <Route path={"/authority/intelligence"} component={AuthorityIntelligence} />
       <Route path={"/authority/model-lab"} component={ModelLab} />
+      <Route path={"/authority/ml-monitoring"} component={ModelMonitoring} />
+      <Route path={"/authority/rag-evaluation"} component={RAGEvaluation} />
       <Route path={"/admin"} component={AdminOversight} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

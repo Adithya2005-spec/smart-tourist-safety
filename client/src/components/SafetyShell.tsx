@@ -48,13 +48,15 @@ const touristNav: NavItem[] = [
   { href: "/tourist/settings", label: "Settings", icon: Settings },
 ];
 
-import { Box, Brain, FlaskConical } from "lucide-react";
+import { Box, Brain, FlaskConical, BarChart, FileCheck } from "lucide-react";
 
 const authorityNav: NavItem[] = [
   { href: "/authority", label: "Command centre", icon: LayoutDashboard },
   { href: "/authority/digital-twin", label: "Digital Twin & Simulator", icon: Box, highlight: true },
   { href: "/authority/intelligence", label: "Safety Intelligence AI", icon: Brain, highlight: true },
   { href: "/authority/model-lab", label: "Model Lab & MLOps", icon: FlaskConical },
+  { href: "/authority/ml-monitoring", label: "AI / ML Model Monitoring", icon: BarChart, highlight: true },
+  { href: "/authority/rag-evaluation", label: "RAG Evaluation", icon: FileCheck },
   { href: "/pan-india", label: "Pan-India Directory", icon: Globe2 },
   { href: "/authority/incidents", label: "Incident queue", icon: Siren },
   { href: "/authority/tourists", label: "Tourists", icon: UsersRound },
