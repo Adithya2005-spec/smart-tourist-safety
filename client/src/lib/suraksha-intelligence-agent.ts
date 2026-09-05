@@ -68,6 +68,38 @@ export function processSurakshaIntelligenceQuery(
     );
   }
 
+  // 2. Weather & Environmental Intelligence Queries
+  if (
+    queryLower.includes("weather") ||
+    queryLower.includes("rain") ||
+    queryLower.includes("rainfall") ||
+    queryLower.includes("storm") ||
+    queryLower.includes("wind") ||
+    queryLower.includes("station") ||
+    queryLower.includes("temperature") ||
+    queryLower.includes("aws") ||
+    queryLower.includes("environmental")
+  ) {
+    toolsExecuted.push("getNearbyLocationWeatherIntelligence", "detectWeatherAnomaly");
+    answer = `**AWS Environmental Safety Intelligence**:\nNearby weather stations report **${queryLower.includes("rain") ? "active rain telemetry" : "environmental baseline"}**. Sensor hardware health is verified at 94%, with multi-station consensus active across territory nodes.`;
+    evidence.push(
+      { label: "Weather Risk", value: "MEDIUM (35/100)", tone: "amber" },
+      { label: "Primary AWS", value: "AWS-KA-101 (0.8km)", tone: "cyan" },
+      { label: "Consensus", value: "3/3 Stations Agree", tone: "emerald" },
+      { label: "Sensor Health", value: "94% Operational", tone: "cyan" },
+      { label: "Advisory Standard", value: "NDMA Rainfall Protocol" }
+    );
+    sources.push("AWS Isolation Forest Anomaly Pipeline v1.2", "NDMA Heavy Rainfall Advisory Document (KNOW-ENV-01)");
+    return buildResponse(
+      answer,
+      evidence,
+      sources,
+      toolsExecuted,
+      mode,
+      { title: "Monitor AWS Telemetry for Continuous Rainfall Acceleration", hitlRequired: false }
+    );
+  }
+
   // 3. Risk Queries
   if (queryLower.includes("highest") || queryLower.includes("which zone") || queryLower.includes("risk score") || queryLower.includes("risk")) {
     toolsExecuted.push("getCurrentRisk", "getResponderStatus", "getConnectivityStatus");

@@ -77,25 +77,51 @@ CREATE TABLE IF NOT EXISTS public.location_shares (
     status TEXT DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'EXPIRED', 'STOPPED'))
 );
 
--- 8. ML Model Predictions & Monitoring Tables
-CREATE TABLE IF NOT EXISTS public.model_predictions (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    model_name TEXT NOT NULL,
-    model_version TEXT NOT NULL,
-    input_features JSONB NOT NULL,
-    prediction_output JSONB NOT NULL,
-    confidence_score NUMERIC(5, 4),
-    latency_ms NUMERIC(8, 2),
-    created_at TIMESTAMPTZ DEFAULT now()
+-- 9. Automatic Weather Station (AWS) & Anomaly Telemetry Tables
+CREATE TABLE IF NOT EXISTS public.weather_stations (
+    station_id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    state_id TEXT NOT NULL,
+    district TEXT,
+    latitude NUMERIC(10, 6) NOT NULL,
+    longitude NUMERIC(10, 6) NOT NULL,
+    elevation_m NUMERIC(8, 2),
+    sensor_status TEXT DEFAULT 'HEALTHY' CHECK (sensor_status IN ('HEALTHY', 'DEGRADED', 'ANOMALOUS')),
+    sensor_health_score NUMERIC(5, 4) DEFAULT 1.0,
+    last_updated TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS public.model_metrics (
+CREATE TABLE IF NOT EXISTS public.weather_observations (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    model_name TEXT NOT NULL,
-    model_version TEXT NOT NULL,
-    dataset_name TEXT NOT NULL,
-    metrics JSONB NOT NULL,
-    evaluated_at TIMESTAMPTZ DEFAULT now()
+    station_id TEXT REFERENCES public.weather_stations(station_id) ON DELETE CASCADE,
+    timestamp TIMESTAMPTZ DEFAULT now(),
+    temperature NUMERIC(5, 2),
+    humidity NUMERIC(5, 2),
+    pressure NUMERIC(7, 2),
+    wind_speed NUMERIC(5, 2),
+    wind_direction NUMERIC(5, 2),
+    rainfall NUMERIC(6, 2),
+    solar_radiation NUMERIC(7, 2),
+    visibility NUMERIC(5, 2),
+    cloud_cover NUMERIC(5, 2),
+    weather_condition TEXT DEFAULT 'CLEAR',
+    data_source TEXT DEFAULT 'AWS_TELEMETRY',
+    data_quality_score NUMERIC(5, 4) DEFAULT 1.0,
+    sensor_status TEXT DEFAULT 'HEALTHY'
+);
+
+CREATE TABLE IF NOT EXISTS public.weather_anomalies (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    station_id TEXT REFERENCES public.weather_stations(station_id) ON DELETE CASCADE,
+    observation_id UUID REFERENCES public.weather_observations(id) ON DELETE SET NULL,
+    anomaly_score NUMERIC(5, 4) NOT NULL,
+    is_anomaly BOOLEAN DEFAULT false,
+    confidence NUMERIC(5, 4) DEFAULT 0.9,
+    affected_features TEXT[],
+    sensor_health_score NUMERIC(5, 4) DEFAULT 1.0,
+    anomaly_type TEXT DEFAULT 'NORMAL' CHECK (anomaly_type IN ('NORMAL', 'ENVIRONMENTAL_HAZARD', 'SENSOR_HARDWARE_FAULT', 'SPATIAL_DISCREPANCY')),
+    explanation TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- ====================================================================

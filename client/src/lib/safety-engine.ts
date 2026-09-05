@@ -112,6 +112,13 @@ export type RiskFeatures = {
   weatherCondition?: "CLEAR" | "RAIN" | "HEAVY_STORM" | "FOG";
   activeNearbyIncidents?: number;
   routeDeviation?: boolean;
+  // AWS Environmental Intelligence Additions
+  environmentalRiskScore?: number;
+  weatherAnomalyScore?: number;
+  weatherConfidence?: number;
+  nearbyStationCount?: number;
+  sensorHealthScore?: number;
+  weatherTrend?: string;
 };
 
 export type RiskPrediction = {
@@ -122,6 +129,10 @@ export type RiskPrediction = {
   method: string;
   dataClassification: "DEMO_SYNTHETIC" | "HISTORICAL_REFERENCE" | "LIVE_USER_EVENT";
   timestamp: string;
+  // Environmental Metadata
+  environmentalContributionPct?: number;
+  weatherConfidence?: number;
+  nearbyStationsCount?: number;
 };
 
 export interface RiskPredictionService {
@@ -157,7 +168,15 @@ export function evaluateGeofences(location: GeoPoint, zones: RiskZone[]) {
 export function calculateContextualRisk(features: RiskFeatures): RiskPrediction {
   const locImpact = Math.min(30, Math.round(features.historicalRisk * 0.3));
   const tempImpact = Math.round(Math.max(0, 22 - Math.abs(features.hour - 22)) * 1.1);
-  const envImpact = features.weatherCondition === "HEAVY_STORM" ? 18 : features.weatherCondition === "RAIN" ? 8 : 2;
+  
+  // Combine base weather condition impact with AWS Environmental Intelligence score if available
+  const baseEnvImpact = features.weatherCondition === "HEAVY_STORM" ? 18 : features.weatherCondition === "RAIN" ? 8 : 2;
+  const awsEnvImpact = features.environmentalRiskScore !== undefined 
+    ? Math.round(features.environmentalRiskScore * 0.25)
+    : baseEnvImpact;
+  
+  const envImpact = Math.max(baseEnvImpact, awsEnvImpact);
+
   const incidentImpact = Math.min(35, features.recentIncidentCount * 4 + (features.activeNearbyIncidents || 0) * 6);
   const crowdImpact = Math.min(15, features.touristDensity * 1.5);
   const deviationImpact = features.routeDeviation ? 12 : 0;
@@ -171,7 +190,7 @@ export function calculateContextualRisk(features: RiskFeatures): RiskPrediction 
     { factor: features.hour >= 20 || features.hour <= 5 ? "Late night temporal factor" : "Daytime temporal factor", impact: tempImpact },
     { factor: "Active nearby incident proximity", impact: incidentImpact },
     { factor: "Crowd density exposure", impact: crowdImpact },
-    { factor: "Weather/environmental condition", impact: envImpact },
+    { factor: `AWS Environmental Intelligence (${features.weatherTrend || "Baseline"})`, impact: envImpact },
   ];
 
   if (deviationImpact > 0) {
@@ -180,14 +199,19 @@ export function calculateContextualRisk(features: RiskFeatures): RiskPrediction 
 
   factors.sort((a, b) => b.impact - a.impact);
 
+  const envPct = score > 0 ? Math.round((envImpact / score) * 100) : 0;
+
   return {
     score,
     severity,
     band: severity,
     factors,
-    method: "Contextual Multi-Factor Safety Engine",
+    method: "Contextual Multi-Factor Safety Engine with AWS Environmental Intelligence",
     dataClassification: "DEMO_SYNTHETIC",
     timestamp: new Date().toISOString(),
+    environmentalContributionPct: envPct,
+    weatherConfidence: features.weatherConfidence ?? 0.92,
+    nearbyStationsCount: features.nearbyStationCount ?? 3,
   };
 }
 

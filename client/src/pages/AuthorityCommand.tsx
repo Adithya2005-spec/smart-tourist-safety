@@ -126,6 +126,72 @@ export default function AuthorityCommand() {
         />
       </div>
 
+      {/* AWS Environmental Intelligence Alert & Telemetry Panel */}
+      <div className="mt-5 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-bold">
+              <Activity className="h-5 w-5" />
+            </div>
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-cyan-700 dark:text-cyan-400">
+                AWS SENSOR TELEMETRY & ENVIRONMENTAL ALERT MONITOR
+              </span>
+              <h3 className="text-base font-black text-slate-950 dark:text-white">
+                Territory Weather Anomaly Intelligence ({activeState.name})
+              </h3>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-mono">
+            <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 px-3 py-1 font-bold text-emerald-800 dark:text-emerald-300">
+              3 Healthy AWS Sync
+            </span>
+            <span className="rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 px-3 py-1 font-bold text-amber-800 dark:text-amber-300">
+              1 Sensor Fault Isolated
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-4 border border-slate-100 dark:border-slate-800 space-y-1">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Primary Station (AWS-KA-101)
+            </p>
+            <p className="text-sm font-black text-slate-900 dark:text-white">
+              Temp 26.4°C · Rain 12.5mm
+            </p>
+            <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+              Sensor Health: 98% (Normal)
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-4 border border-slate-100 dark:border-slate-800 space-y-1">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Nandi Ridge (AWS-KA-103)
+            </p>
+            <p className="text-sm font-black text-slate-900 dark:text-white">
+              Rain 24.2mm · Wind 28.5km/h
+            </p>
+            <p className="text-[11px] text-rose-500 font-medium">
+              Environmental Risk: HIGH (Rain Acceleration)
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-amber-500/10 p-4 border border-amber-500/30 space-y-1">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+              Isolated Node (AWS-KA-108)
+            </p>
+            <p className="text-sm font-black text-amber-900 dark:text-amber-200">
+              Temp Spike 48.9°C (Discrepancy)
+            </p>
+            <p className="text-[11px] text-amber-700 dark:text-amber-300 font-medium">
+              Status: HARDWARE FAULT ISOLATED (Health: 41%)
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Next Best Action & HITL Decision Bar */}
       <div className="mt-5 rounded-3xl border border-cyan-900 bg-[#082235] p-6 text-white shadow-xl space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">

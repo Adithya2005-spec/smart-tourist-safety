@@ -1,12 +1,28 @@
 export interface KnowledgeDocument {
   id: string;
-  category: "EMERGENCY_POLICY" | "STATE_SAFETY" | "DIGITAL_TWIN" | "SYSTEM_ARCH" | "ML_GOVERNANCE" | "OPERATIONAL_GUIDE";
+  category: "EMERGENCY_POLICY" | "STATE_SAFETY" | "DIGITAL_TWIN" | "SYSTEM_ARCH" | "ML_GOVERNANCE" | "OPERATIONAL_GUIDE" | "ENVIRONMENTAL_ADVISORY";
   title: string;
   tags: string[];
   content: string;
 }
 
 export const ragKnowledgeBase: KnowledgeDocument[] = [
+  {
+    id: "KNOW-ENV-01",
+    category: "ENVIRONMENTAL_ADVISORY",
+    title: "National Disaster Management Authority (NDMA) Heavy Rainfall Advisory",
+    tags: ["weather", "rainfall", "rain", "flood", "storm", "aws", "environmental", "monsoon"],
+    content:
+      "Official NDMA Protocol: During heavy rainfall (>35mm/hr) or flash flood warnings, tourists should avoid mountain passes, river banks, and unpaved hill roads. When nearby AWS weather stations report a deteriorating trend or continuous rain acceleration over 30 minutes, tourists are advised to pause outdoor travel, seek solid shelter, and select recommended alternative low-risk routes.",
+  },
+  {
+    id: "KNOW-ENV-02",
+    category: "ENVIRONMENTAL_ADVISORY",
+    title: "AWS Telemetry vs RAG Knowledge Integration Standard",
+    tags: ["aws", "telemetry", "sensor", "confidence", "isolation", "disagreement", "rag"],
+    content:
+      "Suraksha Link distinguishes between LIVE SENSOR TELEMETRY (real-time temperature, rainfall, pressure, wind) and RAG KNOWLEDGE ADVISORIES (official NDMA/IMD protocols). In the event of a flagged AWS hardware anomaly (e.g. single station reporting 180mm rain while nearby stations report 14mm), the sensor isolation model drops the suspicious sensor from tourist risk scoring while maintaining RAG safety guidance.",
+  },
   {
     id: "KNOW-POLICY-01",
     category: "EMERGENCY_POLICY",

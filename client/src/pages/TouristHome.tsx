@@ -16,8 +16,15 @@ import {
   Clock,
   HelpCircle,
   CheckCircle2,
+  CloudRain,
+  Wind,
+  Thermometer,
+  Info,
 } from "lucide-react";
+import { useState } from "react";
 import { Link } from "wouter";
+import { getNearbyLocationWeatherIntelligence } from "@/lib/environmental-risk-model";
+import { WhyRiskExplanationModal } from "@/components/WhyRiskExplanationModal";
 
 export default function TouristHome() {
   const {
@@ -34,7 +41,11 @@ export default function TouristHome() {
     riskForecast,
     riskTimeline,
     counterfactuals,
+    location,
   } = useSafety();
+
+  const [showWhyModal, setShowWhyModal] = useState(false);
+  const envRisk = getNearbyLocationWeatherIntelligence(location);
 
   const labels =
     language === "hi"
@@ -211,6 +222,87 @@ export default function TouristHome() {
         </section>
       </div>
 
+      {/* Compact Environmental Safety Card (AWS Intelligence) */}
+      <div className="mt-5 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-bold">
+              <CloudRain className="h-5 w-5" />
+            </div>
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-cyan-700 dark:text-cyan-400">
+                AWS ENVIRONMENTAL SAFETY INTELLIGENCE
+              </span>
+              <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <span>Environmental Risk:</span>
+                <span
+                  className={`font-black uppercase text-sm ${
+                    envRisk.environmentalRiskLevel === "HIGH" || envRisk.environmentalRiskLevel === "CRITICAL"
+                      ? "text-rose-500"
+                      : envRisk.environmentalRiskLevel === "MEDIUM"
+                      ? "text-amber-500"
+                      : "text-emerald-500"
+                  }`}
+                >
+                  {envRisk.environmentalRiskLevel} ({envRisk.environmentalRiskScore}/100)
+                </span>
+              </h3>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowWhyModal(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-cyan-300/60 dark:border-cyan-800 bg-cyan-50 dark:bg-cyan-950/60 px-3.5 py-2 text-xs font-bold text-cyan-900 dark:text-cyan-300 hover:bg-cyan-100 transition shadow-sm"
+            >
+              <Info className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+              Why Did AI Give This Risk?
+            </button>
+            <Link
+              href="/tourist/map"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 dark:bg-slate-800 px-3.5 py-2 text-xs font-bold text-white hover:bg-slate-800 transition"
+            >
+              View AWS Map
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-4">
+          <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-3 border border-slate-100 dark:border-slate-800">
+            <p className="text-[10px] font-bold text-slate-400 uppercase">Station Distance</p>
+            <p className="mt-0.5 text-sm font-bold text-slate-900 dark:text-white font-mono">
+              {envRisk.nearestStationDistanceKm} km ({envRisk.primaryStationId || "AWS-KA-101"})
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-3 border border-slate-100 dark:border-slate-800">
+            <p className="text-[10px] font-bold text-slate-400 uppercase">Weather Confidence</p>
+            <p className="mt-0.5 text-sm font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+              {Math.round(envRisk.weatherConfidence * 100)}% ({envRisk.agreeingStationCount}/{envRisk.nearbyStationCount} Agree)
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-3 border border-slate-100 dark:border-slate-800">
+            <p className="text-[10px] font-bold text-slate-400 uppercase">Sensor Health</p>
+            <p className="mt-0.5 text-sm font-bold text-cyan-600 dark:text-cyan-400 font-mono">
+              {Math.round(envRisk.sensorHealthScore * 100)}% ({envRisk.flaggedStationCount > 0 ? `${envRisk.flaggedStationCount} Fault Isolated` : "100% Operational"})
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-3 border border-slate-100 dark:border-slate-800">
+            <p className="text-[10px] font-bold text-slate-400 uppercase">Weather Trend</p>
+            <p className="mt-0.5 text-sm font-bold text-slate-900 dark:text-white font-mono flex items-center gap-1">
+              <span>{envRisk.weatherTrend}</span>
+            </p>
+          </div>
+        </div>
+
+        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+          {envRisk.summary}
+        </p>
+      </div>
+
       {/* Risk Explanation Timeline */}
       <div className="mt-5">
         <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
@@ -240,6 +332,15 @@ export default function TouristHome() {
           </div>
         </section>
       </div>
+
+      {/* Why Risk Explanation Modal */}
+      <WhyRiskExplanationModal
+        isOpen={showWhyModal}
+        onClose={() => setShowWhyModal(false)}
+        risk={risk}
+        envRisk={envRisk}
+        locationName={locationName}
+      />
     </SafetyShell>
   );
 }

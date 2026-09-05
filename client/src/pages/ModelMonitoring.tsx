@@ -248,27 +248,8 @@ export default function ModelMonitoring() {
           <ModelMonitoringCard
             modelName="Responder Allocation Engine"
             version="v1.0-dispatch"
-            algorithm="K-Nearest Dispatch Optimizer"
+            algorithm="Mixed Integer Linear Program (MILP)"
             datasetReport={getReport("responder_allocation")}
-            targetVariable="assigned (Unpopulated)"
-            trainingSamples={0}
-            testSamples={0}
-            metrics={{
-              "Distance km": "1.8 km",
-              "Est Response Time": "4.2 mins",
-              "Availability Rate": "100%",
-              "Dispatch Status": "ASSIGNED",
-            }}
-            latencies={{ preprocessing: 0.8, inference: 2.1, db: 0.8, total: 3.7 }}
-            status="PROTOTYPE / SIMULATION MODE"
-            lastPrediction="Assigned Unit: Tourist Police R01"
-          />
-
-          {/* 7. Guardian AI */}
-          <ModelMonitoringCard
-            modelName="Suraksha Guardian AI"
-            version="v2.1-rag-grounded"
-            algorithm="RAG Retriever + Context Tool Orchestrator"
             datasetReport={getReport("guardian_finetuning_example")}
             targetVariable="Instruction-Response Pair"
             trainingSamples={1}

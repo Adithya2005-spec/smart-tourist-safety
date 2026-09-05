@@ -1,7 +1,8 @@
 import { useSafety } from "@/contexts/SafetyContext";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Cross, Hospital, MapPinned, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Cross, Hospital, MapPinned, ShieldCheck, Thermometer } from "lucide-react";
 import { RiskBadge } from "./SafetyShell";
+import { initialWeatherStations, initialWeatherObservations } from "@/lib/india-weather-stations";
 
 function computeBounds(points: { lat: number; lng: number }[]) {
   if (!points.length) {
@@ -119,6 +120,49 @@ export function DemoSafetyMap({
           </div>
         ))}
 
+      {/* AWS Weather Station Markers */}
+      {initialWeatherStations.map((station) => {
+        const obs = initialWeatherObservations[station.stationId];
+        const isAnomalous = obs?.sensorStatus === "ANOMALOUS";
+        const pos = position(station.location);
+
+        return (
+          <div
+            key={station.stationId}
+            className="absolute z-25 -translate-x-1/2 -translate-y-1/2 group cursor-pointer"
+            style={pos}
+          >
+            <div
+              className={cn(
+                "grid h-8 w-8 place-items-center rounded-xl border shadow-md transition-transform group-hover:scale-110",
+                isAnomalous
+                  ? "bg-amber-500 text-white border-amber-300 ring-2 ring-amber-400/50"
+                  : "bg-cyan-600 text-white border-cyan-300"
+              )}
+            >
+              <Thermometer className="h-4 w-4" />
+            </div>
+
+            {/* Hover Popup Tooltip */}
+            <div className="absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 group-hover:block z-40 w-48 rounded-xl bg-slate-900/95 border border-cyan-500/30 p-2.5 text-white shadow-2xl backdrop-blur-md">
+              <div className="flex items-center justify-between text-[10px] font-mono text-cyan-300">
+                <span>{station.stationId}</span>
+                <span className={isAnomalous ? "text-amber-400 font-bold" : "text-emerald-400 font-bold"}>
+                  {isAnomalous ? "HARDWARE FAULT" : "HEALTHY"}
+                </span>
+              </div>
+              <p className="mt-1 text-xs font-bold text-slate-100 truncate">{station.name}</p>
+              <div className="mt-1.5 grid grid-cols-2 gap-1 text-[9px] font-mono text-slate-300 border-t border-white/10 pt-1">
+                <span>Temp: {obs?.temperature}°C</span>
+                <span>Rain: {obs?.rainfall}mm</span>
+                <span>Wind: {obs?.windSpeed}km/h</span>
+                <span>Health: {Math.round(station.sensorHealthScore * 100)}%</span>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
       {/* Current Location Marker */}
       <div className="absolute z-30 -translate-x-1/2 -translate-y-1/2 transition-all duration-500" style={position(location)}>
         <div className="grid h-11 w-11 place-items-center rounded-full bg-[#082235] dark:bg-cyan-500 text-cyan-300 dark:text-slate-950 shadow-xl ring-4 ring-white/90 dark:ring-slate-900">
@@ -130,22 +174,22 @@ export function DemoSafetyMap({
       </div>
 
       {/* Map Legend */}
-      <div className="absolute bottom-4 left-4 z-20 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 p-3 shadow-md backdrop-blur-md">
-        <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-          {activeState.name} Geofence Map
+      <div className="absolute bottom-4 left-4 z-20 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 p-3 shadow-md backdrop-blur-md space-y-1">
+        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+          {activeState.name} Geofence & AWS Map
         </p>
         <div className="flex flex-wrap gap-2 text-slate-800 dark:text-slate-200">
           <span className="flex items-center gap-1 text-[10px] font-semibold">
             <i className="h-2 w-2 rounded-full bg-emerald-500" />
-            Safe
-          </span>
-          <span className="flex items-center gap-1 text-[10px] font-semibold">
-            <i className="h-2 w-2 rounded-full bg-amber-500" />
-            Caution
+            Safe Zone
           </span>
           <span className="flex items-center gap-1 text-[10px] font-semibold">
             <i className="h-2 w-2 rounded-full bg-rose-500" />
-            Danger
+            Danger Zone
+          </span>
+          <span className="flex items-center gap-1 text-[10px] font-semibold">
+            <i className="h-2 w-2 rounded-full bg-cyan-500" />
+            AWS Telemetry
           </span>
         </div>
       </div>
