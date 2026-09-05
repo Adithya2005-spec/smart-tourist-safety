@@ -1,5 +1,6 @@
 import React from "react";
 import { getDatasetInspectionReports, type DatasetInspectionReport } from "@/lib/dataset-provenance-inspector";
+import { createProvenanceTag } from "@/lib/data-provenance";
 import { FlaskConical, Database, Clock, ShieldCheck, AlertCircle, BarChart3, Cpu, Radio, GitBranch, Layers } from "lucide-react";
 
 interface ModelMonitoringCardProps {
@@ -314,14 +315,7 @@ export default function ModelMonitoring() {
               rowCount: 3000,
               columnCount: 14,
               fileSizeBytes: 245000,
-              provenance: {
-                category: "REAL",
-                sourceDescription: "Pan-India AWS Weather Telemetry Network",
-                dataClassification: "LIVE_USER_EVENT",
-                confidenceScore: 0.96,
-                isSimulatedFallback: false,
-                requiresDisclaimer: false,
-              },
+              provenance: createProvenanceTag("REAL", "Pan-India AWS Weather Telemetry Network"),
             }}
             targetVariable="sensor_hardware_fault / environmental_hazard"
             trainingSamples={2400}
