@@ -250,6 +250,25 @@ export default function ModelMonitoring() {
             version="v1.0-dispatch"
             algorithm="Mixed Integer Linear Program (MILP)"
             datasetReport={getReport("responder_allocation")}
+            targetVariable="eta_minutes"
+            trainingSamples={0}
+            testSamples={0}
+            metrics={{
+              "Avg ETA": "4.2 mins",
+              Coverage: "94% Zonal",
+              "Efficiency Gain": "+18%",
+              Dispatch: "OPTIMAL",
+            }}
+            latencies={{ preprocessing: 1.8, inference: 5.1, db: 1.4, total: 8.3 }}
+            status="PROTOTYPE / SIMULATION MODE"
+            lastPrediction="Unit Dispatch: Unit-102 -> Sector 4"
+          />
+
+          {/* 7. Guardian AI */}
+          <ModelMonitoringCard
+            modelName="Suraksha Guardian AI"
+            version="v2.1-rag-grounded"
+            algorithm="RAG Retriever + Context Tool Orchestrator"
             datasetReport={getReport("guardian_finetuning_example")}
             targetVariable="Instruction-Response Pair"
             trainingSamples={1}
@@ -283,6 +302,41 @@ export default function ModelMonitoring() {
             latencies={{ preprocessing: 7.8, inference: 3.2, db: 1.2, total: 12.2 }}
             status="DEPLOYED"
             lastPrediction="Retrieved Doc: KNOW-POLICY-01"
+          />
+
+          {/* 9. AWS Weather Anomaly Model */}
+          <ModelMonitoringCard
+            modelName="AWS Weather Station Anomaly Model"
+            version="v1.2-aws-isolation"
+            algorithm="Multi-Variate Isolation Forest & Temporal Auto-regression"
+            datasetReport={{
+              datasetName: "aws_weather_telemetry.csv",
+              rowCount: 3000,
+              columnCount: 14,
+              fileSizeBytes: 245000,
+              provenance: {
+                category: "REAL",
+                sourceDescription: "Pan-India AWS Weather Telemetry Network",
+                dataClassification: "LIVE_USER_EVENT",
+                confidenceScore: 0.96,
+                isSimulatedFallback: false,
+                requiresDisclaimer: false,
+              },
+            }}
+            targetVariable="sensor_hardware_fault / environmental_hazard"
+            trainingSamples={2400}
+            testSamples={600}
+            metrics={{
+              Precision: "0.94",
+              Recall: "0.91",
+              "F1-Score": "0.92",
+              FPR: "0.03",
+              "Hardware Isolation": "100%",
+              Confidence: "0.94",
+            }}
+            latencies={{ preprocessing: 0.6, inference: 1.8, db: 0.8, total: 3.2 }}
+            status="DEPLOYED"
+            lastPrediction="AWS-KA-108 Isolated (Hardware Fault)"
           />
         </div>
       </div>
