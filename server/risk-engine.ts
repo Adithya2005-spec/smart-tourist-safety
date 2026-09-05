@@ -36,3 +36,41 @@ export function evaluateBackendContextualRisk(features: RiskFeatures): RiskPredi
     timestamp: new Date().toISOString(),
   };
 }
+
+export function evaluateUnifiedBackendRisk(features: {
+  incidentCount?: number;
+  recentIncidents?: number;
+  rainfallMm?: number;
+  touristDensity?: number;
+  hour?: number;
+  naturalHazardScore?: number;
+  connectivityScore?: number;
+  emergencyInfrastructureScore?: number;
+}): RiskPrediction & { unifiedScore: number; activeSignalsCount: number } {
+  const base = evaluateBackendContextualRisk({
+    historicalIncidentCount: features.incidentCount || 5,
+    recentIncidentCount: features.recentIncidents || 2,
+    severity: 6,
+    touristDensity: features.touristDensity || 5,
+    hour: features.hour ?? new Date().getHours(),
+    weatherCondition: (features.rainfallMm || 0) > 30 ? "HEAVY_STORM" : (features.rainfallMm || 0) > 10 ? "RAIN" : "NORMAL",
+  });
+
+  const hazardImpact = Math.round((features.naturalHazardScore || 0) * 0.15);
+  const connImpact = (features.connectivityScore || 100) < 30 ? 10 : 0;
+  const infraBonus = Math.max(0, Math.round(((features.emergencyInfrastructureScore || 80) - 50) * 0.1));
+
+  const unifiedScore = Math.max(0, Math.min(100, base.score + hazardImpact + connImpact - infraBonus));
+  const unifiedSeverity = getSeverityBand(unifiedScore);
+
+  return {
+    ...base,
+    score: unifiedScore,
+    severity: unifiedSeverity,
+    band: unifiedSeverity,
+    unifiedScore,
+    activeSignalsCount: Object.keys(features).length,
+    method: "Unified Multi-Signal Composite Engine v2.1",
+  };
+}
+

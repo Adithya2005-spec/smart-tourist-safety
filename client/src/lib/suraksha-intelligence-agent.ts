@@ -1,6 +1,7 @@
 import { createProvenanceTag, type DataProvenanceTag } from "./data-provenance";
 import { retrieveKnowledge } from "./rag-retriever";
 import * as liveTools from "./live-data-tools";
+import { evaluateEmergencyInfrastructureSignal } from "./multi-signal-intelligence";
 
 export type AgentResponseMode =
   | "QUICK ANSWER"
@@ -140,24 +141,48 @@ export function processSurakshaIntelligenceQuery(
     sources.push("What-If Spatial Simulation Engine");
     recommendedAction = { title: "Issue Pre-Positioning Order for Backup Emergency Units", hitlRequired: true };
   }
-  // 5. Incident Queries
+  // 5. Emergency Infrastructure & Health Facilities Queries
+  else if (
+    queryLower.includes("hospital") ||
+    queryLower.includes("police") ||
+    queryLower.includes("infrastructure") ||
+    queryLower.includes("helpline") ||
+    queryLower.includes("medical") ||
+    queryLower.includes("desk")
+  ) {
+    toolsExecuted.push("evaluateEmergencyInfrastructureSignal");
+    const infra = evaluateEmergencyInfrastructureSignal(undefined, "KA");
+    answer = `**Emergency Infrastructure Proximity Intelligence**:\n${infra.summaryText} All emergency desks operate on 24/7 priority routing protocols.`;
+    evidence.push(
+      { label: "Nearest Hospital", value: `${infra.nearestHospital.name} (${infra.nearestHospital.distanceKm} km)`, tone: "emerald" },
+      { label: "Tourist Police", value: `${infra.nearestPoliceStation.name} (${infra.nearestPoliceStation.distanceKm} km)`, tone: "cyan" },
+      { label: "Fire & Rescue", value: `${infra.nearestFireStation.name} (${infra.nearestFireStation.distanceKm} km)`, tone: "amber" },
+      { label: "Infrastructure Score", value: `${infra.emergencyInfrastructureScore}/100`, tone: "emerald" }
+    );
+    sources.push("Pan-India Emergency Infrastructure Registry", "State Emergency Response Database (112 / 108)");
+    recommendedAction = { title: `Dispatch Nearest Tourist Police Unit (${infra.nearestPoliceStation.helpline})`, hitlRequired: false };
+  }
+  // 6. Incident Queries
   else if (queryLower.includes("incident") || queryLower.includes("sos") || queryLower.includes("active")) {
-    toolsExecuted.push("getActiveIncidents");
+    toolsExecuted.push("getActiveIncidents", "evaluateEmergencyInfrastructureSignal");
     const incRes = liveTools.getActiveIncidents();
+    const infra = evaluateEmergencyInfrastructureSignal(undefined, "KA");
     if (incRes.data.length > 0) {
       const topInc = incRes.data[0];
-      answer = `There are currently **${incRes.data.length} active incidents**. Highest priority: **${topInc.id}** (${topInc.type}) at ${topInc.location}.`;
+      answer = `There are currently **${incRes.data.length} active incidents**. Highest priority: **${topInc.id}** (${topInc.type}) at ${topInc.location}. Nearest medical: **${infra.nearestHospital.name}** (${infra.nearestHospital.distanceKm} km).`;
       evidence.push(
         { label: "Incident ID", value: topInc.id },
         { label: "Type", value: topInc.type },
         { label: "Severity", value: topInc.severity, tone: topInc.severity === "CRITICAL" ? "rose" : "amber" },
-        { label: "Priority Score", value: `${topInc.priorityScore}/100` }
+        { label: "Priority Score", value: `${topInc.priorityScore}/100` },
+        { label: "Nearest Hospital", value: `${infra.nearestHospital.distanceKm} km`, tone: "emerald" },
+        { label: "Tourist Police", value: `${infra.nearestPoliceStation.distanceKm} km`, tone: "cyan" }
       );
     } else {
       answer = "No active SOS incidents. All reported incidents have been resolved.";
       evidence.push({ label: "Active Queue", value: "0 Incidents", tone: "emerald" });
     }
-    sources.push("Live SOS Dispatch Queue");
+    sources.push("Live SOS Dispatch Queue", "Emergency Infrastructure Registry");
   }
   // 6. Model / Drift Queries
   else if (queryLower.includes("model") || queryLower.includes("drift") || queryLower.includes("precision") || queryLower.includes("calibration")) {

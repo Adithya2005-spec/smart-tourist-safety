@@ -1,5 +1,15 @@
 import { GeoPoint, SeverityBand, getSeverityBand } from "./safety-engine";
 
+export type MultiSignalRouteBreakdown = {
+  incidentRisk: number;
+  weatherRisk: number;
+  crowdRisk: number;
+  connectivityRisk: number;
+  hazardRisk: number;
+  terrainRisk: number;
+  infrastructureProximityScore: number;
+};
+
 export type RouteOption = {
   id: string;
   name: string;
@@ -14,6 +24,7 @@ export type RouteOption = {
   rationale: string;
   cost: number;
   waypoints: GeoPoint[];
+  multiSignalRiskBreakdown: MultiSignalRouteBreakdown;
   dataClassification: "DEMO_SYNTHETIC";
 };
 
@@ -42,13 +53,22 @@ export function calculateRouteOptions(req: RouteRequest): RouteOption[] {
     activeIncidentsEnRoute: 2,
     recommendationTag: "NOT_RECOMMENDED",
     recommendationLabel: "NOT RECOMMENDED",
-    rationale: "Direct shortest route crosses 2 high-risk zones with recent active incident reports.",
+    rationale: "Direct shortest route crosses 2 high-risk zones with recent active incident reports and high rainfall accumulation.",
     cost: (0.2 * baseDistance) + (0.3 * baseTime) + (0.5 * 74),
     waypoints: [
       req.origin,
       { lat: req.origin.lat + 0.004, lng: req.origin.lng + 0.003 },
       req.destination,
     ],
+    multiSignalRiskBreakdown: {
+      incidentRisk: 30,
+      weatherRisk: 18,
+      crowdRisk: 12,
+      connectivityRisk: 4,
+      hazardRisk: 6,
+      terrainRisk: 4,
+      infrastructureProximityScore: 65,
+    },
     dataClassification: "DEMO_SYNTHETIC",
   };
 
@@ -63,8 +83,8 @@ export function calculateRouteOptions(req: RouteRequest): RouteOption[] {
     highRiskZonesCrossed: 0,
     activeIncidentsEnRoute: 0,
     recommendationTag: "RECOMMENDED_SAFER",
-    recommendationLabel: "SAFER ROUTE",
-    rationale: `Route B is 3 minutes longer (0.5 km) but avoids two high-risk zones in ${req.stateId} and remains on tourist-police patrolled avenues.`,
+    recommendationLabel: "SAFER ROUTE (LOWER MODELED RISK)",
+    rationale: `Route B is 3 minutes longer (0.5 km) but offers substantially lower modeled risk. It avoids high-risk zones in ${req.stateId} and passes within 1.2 km of a Tourist Police Desk.`,
     cost: (0.2 * (baseDistance + 0.5)) + (0.3 * (baseTime + 3)) + (0.5 * 32),
     waypoints: [
       req.origin,
@@ -72,6 +92,15 @@ export function calculateRouteOptions(req: RouteRequest): RouteOption[] {
       { lat: req.destination.lat - 0.001, lng: req.destination.lng - 0.002 },
       req.destination,
     ],
+    multiSignalRiskBreakdown: {
+      incidentRisk: 8,
+      weatherRisk: 6,
+      crowdRisk: 8,
+      connectivityRisk: 2,
+      hazardRisk: 4,
+      terrainRisk: 4,
+      infrastructureProximityScore: 92,
+    },
     dataClassification: "DEMO_SYNTHETIC",
   };
 
@@ -94,6 +123,15 @@ export function calculateRouteOptions(req: RouteRequest): RouteOption[] {
       { lat: req.origin.lat - 0.003, lng: req.origin.lng + 0.005 },
       req.destination,
     ],
+    multiSignalRiskBreakdown: {
+      incidentRisk: 18,
+      weatherRisk: 10,
+      crowdRisk: 12,
+      connectivityRisk: 2,
+      hazardRisk: 4,
+      terrainRisk: 2,
+      infrastructureProximityScore: 78,
+    },
     dataClassification: "DEMO_SYNTHETIC",
   };
 
