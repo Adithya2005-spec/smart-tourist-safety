@@ -147,145 +147,169 @@ export default function RoleLanding() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-6 pb-16 lg:pt-10 lg:pb-24">
-        {/* Background Travel Canvas & Overlay */}
-        <div className="absolute inset-0 -z-10">
-          <img
-            src="https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1800&q=80"
-            alt="Travel India Backdrop"
-            className="h-full w-full object-cover object-center opacity-15 dark:opacity-20 filter contrast-110 saturate-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-50/90 via-slate-50/95 to-slate-50 dark:from-[#071827]/90 dark:via-[#071827]/95 dark:to-[#071827]" />
+      {/* Hero Section - Historical India → Travel / Journey → Modern India → Suraksha Link */}
+      <section id="hero" className="relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24 bg-[#faf9f5]/80 dark:bg-[#071827] transition-colors duration-300">
+        {/* Subtle Historical Map Watermark Backdrop (Bounded strictly to Hero) */}
+        <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden opacity-10 dark:opacity-15">
+          <svg className="w-full h-full text-amber-900 dark:text-cyan-400" viewBox="0 0 1200 800" fill="none" stroke="currentColor">
+            {/* Subtle Map Grids & Compass Lines */}
+            <circle cx="950" cy="350" r="280" strokeWidth="0.75" strokeDasharray="4 6" />
+            <circle cx="950" cy="350" r="180" strokeWidth="0.5" />
+            <path d="M 950 50 L 950 650 M 650 350 L 1250 350" strokeWidth="0.5" strokeDasharray="3 6" />
+            <path d="M 100 200 Q 300 150 500 280 T 900 350 T 1150 250" strokeWidth="1" strokeDasharray="6 8" />
+            <path d="M 150 500 Q 400 420 650 480 T 1050 420" strokeWidth="0.75" strokeDasharray="4 6" />
+          </svg>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#faf9f5]/50 dark:via-[#071827]/50 to-[#faf9f5] dark:to-[#071827]" />
         </div>
 
         <div className="mx-auto max-w-7xl px-4 sm:px-8">
           <div className="grid gap-12 lg:grid-cols-[1.1fr_.9fr] lg:items-center">
             {/* Hero Left Content */}
             <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/40 bg-cyan-100/80 dark:bg-cyan-950/60 px-4 py-1.5 text-xs font-bold text-cyan-950 dark:text-cyan-300 backdrop-blur-md">
-                <Sparkles className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
-                <span>Pan-India Platform · 28 States & 8 Union Territories</span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-600/30 dark:border-amber-400/20 bg-amber-50/90 dark:bg-amber-950/40 px-4 py-1.5 text-xs font-bold text-amber-900 dark:text-amber-300 backdrop-blur-md shadow-sm">
+                <Sparkles className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <span>Historical Trails · Modern Safety Protection</span>
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-950 dark:text-white leading-[1.08]">
-                Travel India.{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-500 dark:from-cyan-400 dark:to-teal-300">
-                  Travel Safe.
+                EVERY JOURNEY HAS A STORY.{" "}
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-700 via-amber-600 to-cyan-600 dark:from-amber-400 dark:via-cyan-400 dark:to-teal-300">
+                  EVERY JOURNEY DESERVES SAFETY.
                 </span>
               </h1>
 
-              <p className="text-base sm:text-lg leading-relaxed text-slate-700 dark:text-slate-300 max-w-2xl font-normal">
-                Real-time safety intelligence, verified emergency support, and smart travel guidance so you can explore India with confidence.
+              <p className="text-base sm:text-lg leading-relaxed text-slate-700 dark:text-slate-300 max-w-xl font-normal">
+                From ancient routes and timeless destinations to the journeys of today, Suraksha Link helps make travel across India safer, smarter and more connected.
               </p>
 
               {/* Action Buttons */}
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => enterRole("TOURIST")}
-                  className="inline-flex items-center gap-2.5 rounded-2xl bg-[#082235] dark:bg-cyan-500 hover:bg-[#0c314c] dark:hover:bg-cyan-400 text-white dark:text-slate-950 px-6 py-4 text-sm font-bold shadow-xl shadow-cyan-900/10 transition active:scale-[.98]"
+                  onClick={() => {
+                    const el = document.getElementById("features");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="inline-flex items-center gap-2.5 rounded-2xl bg-amber-600 hover:bg-amber-700 dark:bg-cyan-500 dark:hover:bg-cyan-400 text-white dark:text-slate-950 px-6 py-4 text-sm font-bold shadow-lg transition active:scale-[.98]"
                 >
-                  <span>Enter Traveller Portal</span>
+                  <span>EXPLORE SURAKSHA LINK</span>
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => enterRole("TOURIST")}
+                  className="inline-flex items-center gap-2.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0d2233] text-slate-900 dark:text-slate-100 px-6 py-4 text-sm font-bold hover:border-cyan-500 dark:hover:border-cyan-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition shadow-sm"
+                >
+                  <span>ENTER TOURIST PORTAL</span>
                   <ArrowRight className="h-4 w-4" />
                 </button>
 
                 <button
                   type="button"
                   onClick={() => enterRole("AUTHORITY")}
-                  className="inline-flex items-center gap-2.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0d2233] text-slate-800 dark:text-slate-200 px-6 py-4 text-sm font-bold hover:border-cyan-400 dark:hover:border-cyan-500/50 hover:bg-cyan-50/50 dark:hover:bg-slate-800 transition shadow-sm"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/40 dark:border-cyan-500/30 bg-cyan-50/80 dark:bg-cyan-950/40 px-5 py-4 text-sm font-bold text-cyan-950 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/60 transition"
                 >
-                  <span>Open Command Centre</span>
+                  <span>COMMAND CENTRE</span>
                   <ArrowRight className="h-4 w-4" />
                 </button>
-
-                <Link
-                  href="/pan-india"
-                  className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/50 dark:border-cyan-500/30 bg-cyan-50/80 dark:bg-cyan-950/40 px-5 py-4 text-sm font-bold text-cyan-900 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/60 transition"
-                >
-                  <Globe2 className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
-                  <span>Explore All 36 States</span>
-                </Link>
               </div>
 
-              {/* Region Location Indicator */}
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 pt-2">
-                <MapPin className="h-4 w-4 text-cyan-600 dark:text-cyan-400 flex-shrink-0" />
+              {/* Active Region Indicator */}
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 pt-1">
+                <MapPin className="h-4 w-4 text-amber-600 dark:text-cyan-400 flex-shrink-0" />
                 <span>
-                  Active Region: <strong className="text-slate-900 dark:text-white font-bold">{activeState.name} ({activeState.capital})</strong> · Instant switching available across all territories.
+                  Active Region: <strong className="text-slate-900 dark:text-white font-bold">{activeState.name} ({activeState.capital})</strong> · Instant switching available across all 36 territories.
                 </span>
               </div>
             </div>
 
-            {/* Hero Right Floating Safety Status Card */}
+            {/* Hero Right Visual Composition: Single strong visual (Historical India → Modern Safety Route) */}
             <div className="relative">
-              <div className="rounded-3xl border border-slate-200/90 dark:border-slate-800/90 bg-white/95 dark:bg-[#0d2233]/95 p-6 shadow-2xl backdrop-blur-xl space-y-5">
-                {/* Top Card Banner */}
-                <div className="rounded-2xl bg-[#082235] dark:bg-[#050f1a] p-5 text-white shadow-inner space-y-4 border border-white/10">
-                  <div className="flex items-start justify-between gap-3">
+              <div className="rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#0d2233] shadow-2xl overflow-hidden group">
+                {/* Visual Canvas Container */}
+                <div className="relative h-96 sm:h-[420px] w-full overflow-hidden bg-slate-950">
+                  {/* Base Travel & Heritage Imagery */}
+                  <img
+                    src="https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=1200&q=80"
+                    alt="Indian Heritage & Travel Scene"
+                    className="h-full w-full object-cover object-center filter saturate-[1.15] contrast-105 group-hover:scale-105 transition-transform duration-700 opacity-80"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-slate-950/20" />
+
+                  {/* Historical Map Overlay Effect on the Left Portion of the Visual */}
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-amber-500/20 via-transparent to-transparent pointer-events-none" />
+
+                  {/* SVG Route Line: Transitioning from Ancient Dashed Gold to Modern Glowing Cyan */}
+                  <svg className="absolute inset-0 h-full w-full pointer-events-none" viewBox="0 0 500 400" preserveAspectRatio="none">
+                    {/* Ancient Route (Left / Top-Left): Gold Dashed Line */}
+                    <path
+                      d="M 40 80 Q 120 160 220 190"
+                      fill="none"
+                      stroke="#F59E0B"
+                      strokeWidth="3"
+                      strokeDasharray="6 6"
+                      className="opacity-90"
+                    />
+                    {/* Modern Protection Route (Centre to Right): Glowing Cyan Solid Line */}
+                    <path
+                      d="M 220 190 Q 320 220 440 310"
+                      fill="none"
+                      stroke="#06B6D4"
+                      strokeWidth="4"
+                      className="drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]"
+                    />
+
+                    {/* Node 1: Historical Route Marker */}
+                    <circle cx="40" cy="80" r="6" fill="#D97706" />
+                    <circle cx="40" cy="80" r="10" fill="none" stroke="#F59E0B" strokeWidth="1.5" />
+
+                    {/* Node 2: Transition Milestone */}
+                    <circle cx="220" cy="190" r="6" fill="#F59E0B" />
+
+                    {/* Node 3: Suraksha Link Protected Destination */}
+                    <circle cx="440" cy="310" r="8" fill="#06B6D4" className="animate-pulse" />
+                    <circle cx="440" cy="310" r="16" fill="none" stroke="#06B6D4" strokeWidth="2" className="animate-ping opacity-75" />
+                  </svg>
+
+                  {/* Top Badge Overlay */}
+                  <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
+                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md px-3 py-1.5 text-[11px] font-bold text-amber-300 border border-amber-500/30">
+                      <Landmark className="h-3.5 w-3.5 text-amber-400" />
+                      <span>Ancient Trails</span>
+                    </span>
+
+                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md px-3 py-1.5 text-[11px] font-bold text-cyan-300 border border-cyan-500/30">
+                      <ShieldCheck className="h-3.5 w-3.5 text-cyan-400" />
+                      <span>Suraksha Link Protected</span>
+                    </span>
+                  </div>
+
+                  {/* Route Label Badges Floating over SVG Nodes */}
+                  <div className="absolute top-[60px] left-[55px] bg-slate-950/80 backdrop-blur-md text-[10px] font-mono text-amber-200 border border-amber-500/40 rounded-lg px-2 py-0.5 shadow-md">
+                    Ancient Silk & Spice Route
+                  </div>
+
+                  <div className="absolute bottom-[90px] right-[70px] bg-slate-950/80 backdrop-blur-md text-[10px] font-mono text-cyan-200 border border-cyan-500/40 rounded-lg px-2 py-0.5 shadow-md flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
+                    AI Safe Route Active
+                  </div>
+
+                  {/* Bottom Visual Card Banner */}
+                  <div className="absolute bottom-0 inset-x-0 bg-slate-950/90 backdrop-blur-md p-4 border-t border-white/10 flex items-center justify-between text-white">
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-[.18em] text-cyan-300">
-                        LIVE SAFETY STATUS • {activeState.name.toUpperCase()}
+                      <p className="text-[10px] font-black uppercase tracking-widest text-amber-400">
+                        HISTORICAL INDIA → MODERN PROTECTION
                       </p>
-                      <h3 className="mt-1 text-2xl font-black text-white flex items-center gap-2">
-                        <span>Contextual Risk:</span>
-                        <span className="text-rose-400 font-extrabold uppercase text-xl">HIGH</span>
-                      </h3>
+                      <p className="text-xs font-bold text-slate-200 mt-0.5">
+                        Smart Safety Infrastructure for All 36 States & UTs
+                      </p>
                     </div>
-                    <div className="grid h-10 w-10 place-items-center rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30">
-                      <Siren className="h-5 w-5 animate-pulse" />
+                    <div className="flex items-center gap-1 text-[10px] font-mono bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 px-2.5 py-1 rounded-lg">
+                      <CheckCircle2 className="h-3 w-3 text-cyan-400" />
+                      <span>SHA-256 Sync</span>
                     </div>
                   </div>
-
-                  {/* 3 Quick Status Pillars */}
-                  <div className="grid grid-cols-3 gap-2 pt-1 text-center">
-                    <div className="rounded-xl bg-white/5 border border-white/10 p-2.5">
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Edge Sync</p>
-                      <p className="mt-0.5 text-xs font-bold text-emerald-400 flex items-center justify-center gap-1">
-                        <span>Ready</span> <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping inline-block" />
-                      </p>
-                    </div>
-
-                    <div className="rounded-xl bg-white/5 border border-white/10 p-2.5">
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">State Police</p>
-                      <p className="mt-0.5 text-xs font-bold text-white truncate">{activeState.emergency.touristPolice}</p>
-                    </div>
-
-                    <div className="rounded-xl bg-white/5 border border-white/10 p-2.5">
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Blockchain</p>
-                      <p className="mt-0.5 text-xs font-bold text-cyan-300 flex items-center justify-center gap-1">
-                        <span>Verified</span> <CheckCircle2 className="h-3 w-3 text-cyan-400 inline" />
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 4 Feature Preview Cards Grid */}
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <PreviewCard
-                    icon={Globe2}
-                    title="Pan-India Directory"
-                    body="Full safety contacts and local risk profiles for all 36 Indian States & UTs."
-                    href="/pan-india"
-                  />
-                  <PreviewCard
-                    icon={MapPinned}
-                    title="Safety Map & Zones"
-                    body="Cached risk zones, geofencing, and safer alternate routes."
-                    href="/tourist/map"
-                  />
-                  <PreviewCard
-                    icon={BotMessageSquare}
-                    title="Guardian AI"
-                    body="Intelligent multi-state travel advisor and safe-zone guidance."
-                    href="/tourist/guardian"
-                  />
-                  <PreviewCard
-                    icon={UsersRound}
-                    title="Command Centre"
-                    body="Role-gated responder coordination and incident dispatch."
-                    href="/authority"
-                  />
                 </div>
               </div>
             </div>
@@ -294,7 +318,7 @@ export default function RoleLanding() {
       </section>
 
       {/* Popular Travel Destinations Showcase */}
-      <section className="py-12 border-t border-slate-200/80 dark:border-slate-800/80 bg-white/50 dark:bg-[#050f1a]/50">
+      <section id="destinations" className="py-12 border-t border-slate-200/80 dark:border-slate-800/80 bg-white/50 dark:bg-[#050f1a]/50">
         <div className="mx-auto max-w-7xl px-4 sm:px-8 space-y-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -350,7 +374,7 @@ export default function RoleLanding() {
       </section>
 
       {/* 3 Main Value Proposition Cards */}
-      <section className="py-16">
+      <section id="features" className="py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-8 space-y-10">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <p className="text-xs font-black uppercase tracking-widest text-cyan-700 dark:text-cyan-400">
