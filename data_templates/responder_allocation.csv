@@ -1,0 +1,1 @@
+incident_id,incident_lat,incident_lon,incident_severity,responder_id,responder_lat,responder_lon,distance_km,estimated_response_time_min,responder_available,assigned

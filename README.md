@@ -160,9 +160,12 @@ Suraksha Link is architected with a resilient multi-tier fallback mechanism:
 - Intelligent pathway comparison showing shortest direct route vs. verified safer perimeter corridor.
 - Waypoint-level risk scoring avoiding high-density hazard pockets.
 
-### 5. 📧 Resend Automated Emergency Alert Service
-- Instant email dispatch to local police control rooms and primary emergency contacts.
-- Incident deduplication to prevent alert fatigue while allowing critical severity escalations.
+### 5. 📧 Resend Automated Emergency Alert & Anti-Spam Service
+- **Real-Time Dispatch**: Dispatches HTML formatted emergency directives with interactive Google Maps links to control rooms (`safety-control@suraksha.gov.in`) and designated family contacts.
+- **15-Minute Anti-Spam Deduplication Engine**: In-memory deduplication window (`DEDUPLICATION_WINDOW_MS = 15 * 60 * 1000`) prevents alert flooding for the same incident ID (`INC-XXXX`).
+- **Critical Escalation Bypass**: If an incident status escalates to `CRITICAL` from any lower tier, the deduplication lock is immediately bypassed to ensure responder safety.
+- **Audit & Status Tracking**: Query dispatch timing and rate-limiting status in real-time via `GET /api/alerts/status/:incidentId`.
+- **Safe Fallback**: Operates in simulated audit mode if `RESEND_API_KEY` is absent, guaranteeing system resilience.
 
 ### 6. 🔮 Spatial Safety Digital Twin & What-If Simulation Engine (`/authority/digital-twin`)
 - Real-time virtual model representing tourists, active incidents, risk zones, responder units, and connectivity.
@@ -182,6 +185,15 @@ Suraksha Link is architected with a resilient multi-tier fallback mechanism:
 
 ### 9. 🌐 Pan-India 36 State & UT Safety Network (`/pan-india`)
 - Complete directory for all 28 States and 8 Union Territories with state police, tourist police, women helpline (1091/181), ambulance (108), disaster management, and regional travel advisories.
+
+### 10. 📊 Real Data Schema Templates (`/data_templates`)
+Pre-structured, schema-validated templates aligned with official Indian Open Government Data (data.gov.in) and Ministry of Tourism portals:
+- **`drift_baseline.csv` & `drift_current.csv`**: Feature baselines for KS-test and PSI drift validation.
+- **`isolation_tourism_anomaly.csv`**: Features for unsupervised anomaly detection in tourist corridors.
+- **`temporal_tourism_forecasting.csv`**: Time-series historical hourly visitor volumes for predictive risk modelling.
+- **`xgboost_incident_risk.csv` & `random_forest_risk.csv`**: Supervised classification features for safety risk grading.
+- **`responder_allocation.csv`**: Unit dispatch latency and route efficiency operational schemas.
+- **`guardian_finetuning_example.jsonl`**: Domain-specialized instruction datasets for safety copilot fine-tuning.
 
 ---
 
@@ -238,6 +250,22 @@ graph TD
 - **Communications**: Resend API (Emergency dispatch notifications)
 - **Database & ORM**: Drizzle ORM (MySQL / TiDB)
 - **Testing & Verification**: Vitest (9 test suites, 26 unit tests)
+
+---
+
+## 📡 REST API Reference
+
+| Method | Endpoint | Description | Payload Example |
+|---|---|---|---|
+| `POST` | `/api/agent/query` | Executes orchestrated multi-agent DAG evaluation | `{"query": "Is Cubbon Park safe tonight?", "language": "en"}` |
+| `POST` | `/api/agent/plan` | Inspects agent dynamic task planner breakdown | `{"query": "Check weather and crowd near MG Road"}` |
+| `POST` | `/api/guardian/ask` | High-speed Guardian conversational safety endpoint | `{"query": "Emergency contacts in Karnataka", "language": "kn"}` |
+| `POST` | `/api/risk/evaluate` | Unified risk index score calculation ($0-100$) | `{"stateId": "KA", "location": {"lat": 12.97, "lng": 77.59}}` |
+| `GET` | `/api/routes/safe` | Compares direct vs. perimeter safe corridors | *(None)* |
+| `POST` | `/api/alerts/dispatch` | Dispatches Resend emergency email notifications | `{"incidentId": "INC-4500", "severity": "CRITICAL", "incidentType": "Medical"}` |
+| `GET` | `/api/alerts/status/:id`| Checks incident deduplication & rate-limit status | `GET /api/alerts/status/INC-4500` |
+| `POST` | `/api/simulation/what-if`| Stress-tests environmental & crowd escalation scenarios | `{"rainfallShiftMm": 50, "crowdMultiplier": 2.5}` |
+| `GET` | `/api/agent/runs` | Fetches audit log of recent multi-agent runs | *(None)* |
 
 ---
 
