@@ -114,3 +114,60 @@ export type IncidentEventRecord = typeof incidentEvents.$inferSelect;
 export type ResponderRecord = typeof responders.$inferSelect;
 export type AuditEventRecord = typeof auditEvents.$inferSelect;
 export type LocationShareRecord = typeof locationShares.$inferSelect;
+
+// ========================================================
+// MULTI-AGENT PLATFORM ADDITIVE TABLES
+// ========================================================
+
+export const agentRuns = mysqlTable("agent_runs", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  intent: varchar("intent", { length: 64 }).notNull(),
+  query: text("query").notNull(),
+  status: mysqlEnum("status", ["PLANNING", "RUNNING", "COMPLETED", "FAILED"]).default("COMPLETED").notNull(),
+  priority: varchar("priority", { length: 32 }).notNull(),
+  agentsInvoked: text("agentsInvoked").notNull(), // JSON string array
+  executionPlan: text("executionPlan"), // JSON
+  validationSummary: text("validationSummary"), // JSON
+  overallRiskScore: int("overallRiskScore"),
+  riskTier: varchar("riskTier", { length: 32 }),
+  guardianSummary: text("guardianSummary"),
+  executionMs: int("executionMs"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const riskAssessments = mysqlTable("risk_assessments", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  targetEntityId: varchar("targetEntityId", { length: 128 }).notNull(), // touristId or incidentId or zoneId
+  targetType: varchar("targetType", { length: 32 }).notNull(),
+  overallRiskScore: int("overallRiskScore").notNull(),
+  riskTier: varchar("riskTier", { length: 32 }).notNull(),
+  confidenceScore: int("confidenceScore").notNull(),
+  factors: text("factors"), // JSON breakdown
+  evidenceSummary: text("evidenceSummary"), // JSON
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const alertEvents = mysqlTable("alert_events", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  incidentId: varchar("incidentId", { length: 64 }).notNull(),
+  severity: varchar("severity", { length: 32 }).notNull(),
+  status: mysqlEnum("status", ["SENT", "RATE_LIMITED", "PENDING_KEY", "SIMULATED", "ERROR"]).notNull(),
+  recipientCount: int("recipientCount").default(1).notNull(),
+  message: text("message").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const humanDecisions = mysqlTable("human_decisions", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  incidentId: varchar("incidentId", { length: 64 }).notNull(),
+  operatorId: varchar("operatorId", { length: 128 }).notNull(),
+  decision: varchar("decision", { length: 64 }).notNull(), // APPROVE_DISPATCH, OVERRIDE_ROUTE, DISMISS, ESCALATE
+  reason: text("reason"),
+  aiRecommendationSnapshot: text("aiRecommendationSnapshot"), // JSON
+  decidedAt: timestamp("decidedAt").defaultNow().notNull(),
+});
+
+export type AgentRunRecord = typeof agentRuns.$inferSelect;
+export type RiskAssessmentRecord = typeof riskAssessments.$inferSelect;
+export type AlertEventRecord = typeof alertEvents.$inferSelect;
+export type HumanDecisionRecord = typeof humanDecisions.$inferSelect;

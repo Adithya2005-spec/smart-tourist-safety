@@ -26,6 +26,7 @@ import {
   UserCheck,
   Zap,
 } from "lucide-react";
+import { Link } from "wouter";
 
 function StatusBadge({ status }: { status: string }) {
   const colors =
@@ -149,6 +150,12 @@ export default function AuthorityIntelligence() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/authority/dossier"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-1.5 text-xs font-black transition shadow-lg"
+            >
+              <ShieldAlert className="h-4 w-4" /> Safety Dossier
+            </Link>
             <button
               type="button"
               onClick={() => setShowBriefModal(true)}

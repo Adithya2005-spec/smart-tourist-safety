@@ -30,6 +30,8 @@ import AuthorityIntelligence from "./pages/AuthorityIntelligence";
 import ModelLab from "./pages/ModelLab";
 import ModelMonitoring from "./pages/ModelMonitoring";
 import RAGEvaluation from "./pages/RAGEvaluation";
+import GuardianAIPage from "./pages/GuardianAIPage";
+import SafetyDossier from "./pages/SafetyDossier";
 
 function Router() {
   return (
@@ -47,6 +49,8 @@ function Router() {
       <Route path={"/tourist/incidents"} component={TouristIncidents} />
       <Route path={"/tourist/identity"} component={TouristIdentity} />
       <Route path={"/tourist/guardian"} component={TouristGuardian} />
+      <Route path={"/tourist/guardian-ai"} component={GuardianAIPage} />
+      <Route path={"/tourist/dossier"} component={SafetyDossier} />
       <Route path={"/tourist/contacts"} component={TouristContacts} />
       <Route path={"/tourist/location"} component={TouristLocation} />
       <Route path={"/tourist/settings"} component={TouristSettings} />
@@ -55,6 +59,7 @@ function Router() {
       <Route path={"/authority/incidents"} component={AuthorityIncidents} />
       <Route path={"/authority/tourists"} component={AuthorityTourists} />
       <Route path={"/authority/risk"} component={AuthorityRisk} />
+      <Route path={"/authority/dossier"} component={SafetyDossier} />
       <Route path={"/authority/analytics"} component={AuthorityAnalytics} />
       <Route path={"/authority/audit"} component={AuthorityAudit} />
       <Route path={"/authority/intelligence"} component={AuthorityIntelligence} />

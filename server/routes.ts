@@ -1,8 +1,12 @@
 import { Express, Request, Response } from "express";
 import { evaluateBackendContextualRisk } from "./risk-engine";
 import { getRecommendedRespondersBackend } from "./responder-engine";
+import { agentRouter } from "./routes/agent-routes";
 
 export function registerRestApiRoutes(app: Express) {
+  // Mount Multi-Agent AI Intelligence Platform Router
+  app.use("/api/agent", agentRouter);
+  app.use("/api", agentRouter);
   // 1. GET /api/risk/current/:touristId
   app.get("/api/risk/current/:touristId", (req: Request, res: Response) => {
     const risk = evaluateBackendContextualRisk({

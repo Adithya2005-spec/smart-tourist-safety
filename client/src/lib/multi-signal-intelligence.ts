@@ -351,3 +351,56 @@ export function evaluateTerrainSignal(location?: GeoPoint): TerrainSignalResult 
     provenance: createProvenanceTag("SIMULATED", "SRTM Elevation & Terrain Model"),
   };
 }
+
+// ====================================================================
+// 9. SIGNAL DATA QUALITY SCORE ENGINE
+// ====================================================================
+export interface SignalQualityItem {
+  signalName: string;
+  qualityPercentage: number;
+  status: "HIGH" | "MODERATE" | "DEGRADED";
+  provenance: DataProvenanceTag;
+}
+
+export interface DataQualityResult {
+  overallQualityPercentage: number; // e.g. 87%
+  overallStatus: "EXCELLENT" | "GOOD" | "FAIR" | "DEGRADED";
+  signalQualityBreakdown: SignalQualityItem[];
+  missingSignals: string[];
+  evaluatedAt: string;
+  provenance: DataProvenanceTag;
+}
+
+export function calculateDataQualityScore(
+  isOnline = true,
+  missingWeather = false
+): DataQualityResult {
+  const breakdown: SignalQualityItem[] = [
+    { signalName: "Incident data", qualityPercentage: 94, status: "HIGH", provenance: createProvenanceTag("REAL", "SOS Incident Dispatch Ledger") },
+    { signalName: "Weather", qualityPercentage: missingWeather ? 0 : 98, status: missingWeather ? "DEGRADED" : "HIGH", provenance: createProvenanceTag("SIMULATED", "IMD Regional Weather Network") },
+    { signalName: "Tourist density", qualityPercentage: 81, status: "HIGH", provenance: createProvenanceTag("MODEL-DERIVED", "Crowd Density Telemetry") },
+    { signalName: "Connectivity", qualityPercentage: isOnline ? 73 : 20, status: isOnline ? "MODERATE" : "DEGRADED", provenance: createProvenanceTag("REAL", "Cellular Quality Telemetry") },
+    { signalName: "Hazard data", qualityPercentage: 88, status: "HIGH", provenance: createProvenanceTag("SIMULATED", "National Disaster Composite") },
+    { signalName: "Terrain", qualityPercentage: 90, status: "HIGH", provenance: createProvenanceTag("SIMULATED", "SRTM Elevation Model") },
+    { signalName: "Infrastructure", qualityPercentage: 95, status: "HIGH", provenance: createProvenanceTag("REAL", "State Emergency Registry") },
+    { signalName: "Event data", qualityPercentage: 85, status: "HIGH", provenance: createProvenanceTag("REAL", "Pan-India Cultural Calendar") },
+  ];
+
+  const validSignals = breakdown.filter((s) => s.qualityPercentage > 0);
+  const sum = validSignals.reduce((acc, s) => acc + s.qualityPercentage, 0);
+  const overall = Math.round(sum / breakdown.length);
+
+  const missingSignals: string[] = [];
+  if (missingWeather) missingSignals.push("Recent weather observation");
+  if (!isOnline) missingSignals.push("Live 5G/4G tower telemetry sync");
+
+  return {
+    overallQualityPercentage: overall,
+    overallStatus: overall >= 85 ? "EXCELLENT" : overall >= 70 ? "GOOD" : overall >= 50 ? "FAIR" : "DEGRADED",
+    signalQualityBreakdown: breakdown,
+    missingSignals,
+    evaluatedAt: new Date().toISOString(),
+    provenance: createProvenanceTag("MODEL-DERIVED", "Multi-Signal Quality Audit Engine"),
+  };
+}
+

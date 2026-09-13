@@ -53,7 +53,8 @@ export function evaluateUnifiedBackendRisk(features: {
     severity: 6,
     touristDensity: features.touristDensity || 5,
     hour: features.hour ?? new Date().getHours(),
-    weatherCondition: (features.rainfallMm || 0) > 30 ? "HEAVY_STORM" : (features.rainfallMm || 0) > 10 ? "RAIN" : "NORMAL",
+    weatherCondition: (features.rainfallMm || 0) > 30 ? "HEAVY_STORM" : (features.rainfallMm || 0) > 10 ? "RAIN" : "CLEAR",
+    historicalRisk: 50,
   });
 
   const hazardImpact = Math.round((features.naturalHazardScore || 0) * 0.15);

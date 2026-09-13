@@ -25,6 +25,8 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { getNearbyLocationWeatherIntelligence } from "@/lib/environmental-risk-model";
 import { WhyRiskExplanationModal } from "@/components/WhyRiskExplanationModal";
+import { SafetyDossierCard } from "@/components/SafetyDossierCard";
+import { RiskForecastChart } from "@/components/RiskForecastChart";
 
 export default function TouristHome() {
   const {
@@ -111,6 +113,19 @@ export default function TouristHome() {
           </div>
         </div>
       )}
+
+      {/* Multi-Agent Intelligence Unified Dossier Card */}
+      <SafetyDossierCard
+        locationName={`${locationName} (${activeState.name})`}
+        riskScore={risk.score}
+        riskTier={risk.severity || risk.band}
+        confidence={96}
+        activeIncidentsCount={incidents.filter((i) => i.status !== "RESOLVED").length}
+        weatherCondition={envRisk.summary || "Normal"}
+        crowdLevel="Optimal"
+        isOnline={online}
+        dossierUrl="/tourist/dossier"
+      />
 
       <div className="grid gap-5 xl:grid-cols-[1.4fr_.75fr]">
         {/* Main Status Banner */}

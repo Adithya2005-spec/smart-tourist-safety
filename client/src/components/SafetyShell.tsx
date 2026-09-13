@@ -38,11 +38,12 @@ type NavItem = { href: string; label: string; icon: React.ElementType; danger?: 
 const touristNav: NavItem[] = [
   { href: "/tourist", label: "Safety overview", icon: ShieldCheck },
   { href: "/pan-india", label: "Pan-India Explorer", icon: Globe2, highlight: true },
+  { href: "/tourist/dossier", label: "Safety Dossier", icon: FileCheck, highlight: true },
+  { href: "/tourist/guardian", label: "Guardian AI", icon: BotMessageSquare },
   { href: "/tourist/map", label: "Safety map", icon: MapPinned },
   { href: "/tourist/sos", label: "SOS centre", icon: Siren, danger: true },
   { href: "/tourist/incidents", label: "My incidents", icon: ClipboardCheck },
   { href: "/tourist/identity", label: "Digital identity", icon: IdCard },
-  { href: "/tourist/guardian", label: "Guardian AI", icon: BotMessageSquare },
   { href: "/tourist/contacts", label: "Emergency contacts", icon: ContactRound },
   { href: "/tourist/location", label: "Live location", icon: RadioTower },
   { href: "/tourist/settings", label: "Settings", icon: Settings },
@@ -52,6 +53,7 @@ import { Box, Brain, FlaskConical, BarChart, FileCheck } from "lucide-react";
 
 const authorityNav: NavItem[] = [
   { href: "/authority", label: "Command centre", icon: LayoutDashboard },
+  { href: "/authority/dossier", label: "Safety Dossier", icon: FileCheck, highlight: true },
   { href: "/authority/digital-twin", label: "Digital Twin & Simulator", icon: Box, highlight: true },
   { href: "/authority/intelligence", label: "Safety Intelligence AI", icon: Brain, highlight: true },
   { href: "/authority/model-lab", label: "Model Lab & MLOps", icon: FlaskConical },

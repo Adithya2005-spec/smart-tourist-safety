@@ -5,7 +5,8 @@ import {
   type AgentConversationContext,
   type AgentResponseMode,
 } from "@/lib/suraksha-intelligence-agent";
-import { Brain, Send, ChevronDown, CheckCircle2, AlertTriangle, Shield, UserCheck, Cpu } from "lucide-react";
+import { Brain, Send, ChevronDown, CheckCircle2, AlertTriangle, Shield, UserCheck, Cpu, Sparkles } from "lucide-react";
+import { Link } from "wouter";
 
 const SUGGESTED_PROMPTS = [
   "What is the highest operational risk zone right now?",
@@ -164,17 +165,26 @@ export function AskSurakshaPanel({ className = "" }: { className?: string }) {
             <p className="text-sm font-black text-white">AI Safety Decision Support</p>
           </div>
         </div>
-        {/* Mode Selector */}
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setShowModeDropdown((v) => !v)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-300 hover:bg-white/10"
+        <div className="flex items-center gap-2">
+          <Link
+            href="/tourist/guardian-ai"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-3 py-1.5 text-xs font-bold text-indigo-300 hover:bg-indigo-500/20 transition"
           >
-            <Cpu className="h-3 w-3" />
-            {mode}
-            <ChevronDown className="h-3 w-3" />
-          </button>
+            <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+            Guardian AI
+          </Link>
+
+          {/* Mode Selector */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowModeDropdown((v) => !v)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-300 hover:bg-white/10"
+            >
+              <Cpu className="h-3 w-3" />
+              {mode}
+              <ChevronDown className="h-3 w-3" />
+            </button>
           {showModeDropdown && (
             <div className="absolute right-0 top-full z-20 mt-1 min-w-[180px] rounded-2xl border border-white/10 bg-[#071e2e] shadow-2xl">
               {MODE_OPTIONS.map((m) => (
@@ -191,6 +201,7 @@ export function AskSurakshaPanel({ className = "" }: { className?: string }) {
           )}
         </div>
       </div>
+    </div>
 
       {/* Messages */}
       <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">

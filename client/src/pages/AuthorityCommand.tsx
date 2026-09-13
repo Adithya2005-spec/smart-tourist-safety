@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
+import { SafetyDossierCard } from "@/components/SafetyDossierCard";
 
 export default function AuthorityCommand() {
   const allowed = useAuthorityAccess();
@@ -123,6 +124,21 @@ export default function AuthorityCommand() {
           value={digitalTwin.activeResponders}
           detail={`${responders.length} total registered`}
           tone="green"
+        />
+      </div>
+
+      {/* Multi-Agent Unified Safety Dossier Card */}
+      <div className="mt-5">
+        <SafetyDossierCard
+          locationName={`${activeState.name} Central Command District`}
+          riskScore={digitalTwin.overallResilienceScore ? Math.max(10, 100 - digitalTwin.overallResilienceScore) : 28}
+          riskTier={digitalTwin.overallResilienceScore > 70 ? "LOW" : "MODERATE"}
+          confidence={confidenceAI.confidencePercentage}
+          activeIncidentsCount={digitalTwin.activeIncidents}
+          weatherCondition="Operational Radar Normal"
+          crowdLevel="Monitored"
+          isOnline={true}
+          dossierUrl="/authority/dossier"
         />
       </div>
 
