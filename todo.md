@@ -15,7 +15,7 @@
 - [x] Create reusable mock data and local service abstractions so all flows remain navigable without a live backend connection.
 - [x] Add unit tests for safety geofencing, risk prediction, lifecycle transitions, and audit-chain validation.
 - [x] Verify responsive visual quality and interactive flows, correct issues, and update this inventory.
-- [ ] Write concise local setup and architecture documentation, then package the complete repository as a ZIP.
+- [x] Write concise local setup and architecture documentation, then package the complete repository as a ZIP.
 - [x] Correct offline SOS queue semantics so pending incidents remain authority-invisible until synchronization and clear pending markers after sync.
 - [x] Add an administrator-specific route and UI boundary separate from authority operations.
 - [x] Refactor synthetic risk scoring behind an explicit RiskPredictionService boundary.
