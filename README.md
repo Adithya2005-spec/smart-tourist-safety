@@ -35,6 +35,8 @@
   - [7. MLOps Observatory, Model Lab & Drift Detection](#7--model-lab--mlops-observatory-authoritymodel-lab)
   - [8. Edge Storage & Cryptographic Blockchain Audit](#8--offline-edge-storage--sha-256-blockchain-audit)
   - [9. Pan-India 36 State & UT Safety Directory](#9--pan-india-36-state--ut-safety-network-pan-india)
+  - [10. Real Data Schema Templates](#10--real-data-schema-templates-data_templates)
+  - [11. Dynamic Inter-State Travel & GPS Territory Engine](#11--dynamic-inter-state-travel--gps-auto-territory-engine-touristmap-touristlocation)
 - [System Architecture](#-system-architecture)
 - [Tech Stack](#-tech-stack)
 - [Environment Variables](#-environment-variables)
@@ -145,10 +147,11 @@ Suraksha Link is architected with a resilient multi-tier fallback mechanism:
 - **Evidence Verification**: Validates telemetry freshness (<60s = fresh, <300s = acceptable, >300s = stale) and assigns confidence ratings ($0-100\%$).
 
 ### 2. 🛡️ Guardian AI Multilingual Safety Copilot (`/tourist/guardian-ai`)
-- Dedicated conversational safety page with live suggested queries.
-- Instant language switching between **English**, **Hindi (हिंदी)**, and **Kannada (ಕನ್ನಡ)**.
+- Dedicated conversational safety page with state-grounded prompt suggestions.
+- **Dynamic State Grounding**: Suggested queries instantly adapt whenever the traveler changes state or crosses state borders on the map (e.g. customized prompts for Rajasthan, Goa, Delhi, Himachal Pradesh, Kerala, Karnataka, etc.).
+- Instant language switching between **English**, **Hindi (हिंदी)**, and **Kannada (ಕನ್ನಡ)** with localized phrasing.
 - Visual execution trace drawer showing real-time specialist agent status.
-- Key safety tips and actionable emergency directives.
+- Key safety tips, verified Tourist Police contacts, and actionable emergency directives.
 
 ### 3. 📋 Unified Safety Intelligence Dossier (`/tourist/dossier`)
 - Single-pane-of-glass dossier summarizing tourist status, location context, and dynamic danger zones.
@@ -194,6 +197,16 @@ Pre-structured, schema-validated templates aligned with official Indian Open Gov
 - **`xgboost_incident_risk.csv` & `random_forest_risk.csv`**: Supervised classification features for safety risk grading.
 - **`responder_allocation.csv`**: Unit dispatch latency and route efficiency operational schemas.
 - **`guardian_finetuning_example.jsonl`**: Domain-specialized instruction datasets for safety copilot fine-tuning.
+
+### 11. 🧭 Dynamic Inter-State Travel & GPS Auto-Territory Engine (`/tourist/map`, `/tourist/location`)
+- **Real-Time Boundary Detection**: Continuous spatial boundary monitoring for all 36 States & UTs using two-tier spatial indexing (bounding box envelopes + Haversine centroid minimization in `inter-state-geofence.ts`).
+- **Zero-Friction Context Switch**: When a tourist travels or enters a new state on Google Maps or via browser device GPS (`navigator.geolocation`), the entire portal synchronizes automatically:
+  - **Local Emergency Helplines**: Immediately switches to the new state's verified Tourist Police, State Police, Women Helpline (1091/181), and Ambulance (108).
+  - **Zonal Risk Model & Safe Corridors**: Loads local regional hazard zones, verified safe points, and CCTV corridors.
+  - **Guardian AI Dynamic Prompts**: Dynamically refreshes prompt suggestions in English, Hindi (हिंदी), and Kannada (ಕನ್ನಡ) localized to the new state's landmarks and geography.
+  - **Border-Crossing Toast**: Dispatches an instant notification notifying the traveler of their new territory.
+- **Interactive Transit Simulator (`INTER_STATE_TRANSIT_ROUTES`)**: Built-in 1-click border-crossing routes (e.g. *Bengaluru KA ➔ Hosur/Chennai TN*, *Bengaluru KA ➔ Panaji GA*, *New Delhi DL ➔ Jaipur RJ*, *New Delhi DL ➔ Shimla HP*, *Mysuru KA ➔ Fort Kochi KL*) allowing seamless evaluation and demonstration without altering existing workflows.
+- **Map Click-to-Pin**: Allows clicking anywhere on the safety map to move the traveler's GPS pin and test boundary detection.
 
 ---
 
@@ -249,7 +262,7 @@ graph TD
 - **Geospatial & Safe Routing**: Google Maps API, Haversine spatial calculation engine
 - **Communications**: Resend API (Emergency dispatch notifications)
 - **Database & ORM**: Drizzle ORM (MySQL / TiDB)
-- **Testing & Verification**: Vitest (9 test suites, 26 unit tests)
+- **Testing & Verification**: Vitest (10 test suites, 37 unit tests)
 
 ---
 
@@ -312,7 +325,7 @@ npm install
 ```bash
 npm test
 ```
-*Executes all 26 unit tests across the 9 test suites in `vitest`.*
+*Executes all 37 unit tests across the 10 test suites in `vitest`.*
 
 ### 3. Check TypeScript
 ```bash

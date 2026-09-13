@@ -2,18 +2,51 @@ import { AIChatBox, type Message } from "@/components/AIChatBox";
 import { RiskBadge, SafetyNotice, SafetyShell } from "@/components/SafetyShell";
 import { useSafety } from "@/contexts/SafetyContext";
 import { BotMessageSquare, Globe2, MapPin, MapPinned, ShieldCheck, Sparkles, Database, FileText } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "wouter";
+import { getStateSuggestedQueries } from "@/lib/guardian-dynamic-prompts";
 
 export default function TouristGuardian() {
-  const { guardianReply, risk, locationName, zones, activeState } = useSafety();
+  const { guardianReply, risk, locationName, zones, activeState, setActiveState, allStates } = useSafety();
+  const prevStateRef = useRef<string>(activeState.code);
+
+  const getGreeting = (stateName: string, statePolice: string) =>
+    `Namaste! I am Guardian AI, your Pan-India Safety Decision Assistant. I operate strictly using **Grounded Application Context** from the Safety Knowledge Graph.\n\nYou are currently in **${stateName}** (**${locationName}**).\nCurrent risk: **${risk.severity || risk.band} (${risk.score}/100)**.\nLocal Police Helpline: **${statePolice}** (or **112** for Central SOS).\n\nAsk me about local risk factors, safer route alternatives, emergency numbers, or historical incident similarities.`;
 
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: `Namaste! I am Guardian AI, your Pan-India Safety Decision Assistant. I operate strictly using **Grounded Application Context** from the Safety Knowledge Graph.\n\nYou are currently in **${activeState.name}** (**${locationName}**).\nCurrent risk: **${risk.severity || risk.band} (${risk.score}/100)**.\nLocal Police Helpline: **${activeState.emergency.touristPolice}** (or **112** for Central SOS).\n\nAsk me about local risk factors, safer route alternatives, emergency numbers, or historical incident similarities.`,
+      content: getGreeting(activeState.name, activeState.emergency.touristPolice),
     },
   ]);
+
+  // Update greeting and chat context if active state changes
+  useEffect(() => {
+    if (prevStateRef.current !== activeState.code) {
+      setMessages((prev) => {
+        if (prev.length <= 1) {
+          return [
+            {
+              role: "assistant",
+              content: getGreeting(activeState.name, activeState.emergency.touristPolice),
+            },
+          ];
+        }
+        return [
+          ...prev,
+          {
+            role: "assistant",
+            content: `📍 **Grounding Switched to ${activeState.name} (${activeState.capital})**\nEmergency Tourist Police: **${activeState.emergency.touristPolice || "112"}** | Central SOS: **112**\nKnowledge Graph and suggested prompts are now localized to ${activeState.name}.`,
+          },
+        ];
+      });
+      prevStateRef.current = activeState.code;
+    }
+  }, [activeState.code, activeState.name, activeState.emergency.touristPolice, activeState.capital]);
+
+  const dynamicPrompts = useMemo(() => {
+    return getStateSuggestedQueries(activeState, "en");
+  }, [activeState]);
 
   const respond = (question: string) => {
     setMessages((previous) => [
@@ -30,13 +63,32 @@ export default function TouristGuardian() {
       eyebrow="Traveller workspace"
       title="Guardian AI Decision Assistant"
       actions={
-        <Link
-          href="/tourist/guardian-ai"
-          className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition"
-        >
-          <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-          Launch Multi-Agent Intelligence
-        </Link>
+        <div className="flex items-center gap-2">
+          {/* Quick State Switcher */}
+          <div className="flex items-center gap-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-xs shadow-xs">
+            <MapPin className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
+            <select
+              aria-label="Active Indian State"
+              value={activeState.id}
+              onChange={(e) => setActiveState(e.target.value)}
+              className="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer"
+            >
+              {allStates.map((st) => (
+                <option key={st.id} value={st.id} className="text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800">
+                  {st.name} ({st.code})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <Link
+            href="/tourist/guardian-ai"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+            Launch Multi-Agent Intelligence
+          </Link>
+        </div>
       }
     >
       <div className="grid gap-5 xl:grid-cols-[1.25fr_.55fr]">
@@ -56,7 +108,7 @@ export default function TouristGuardian() {
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Active in {activeState.name} ({activeState.code}) · Deterministic Fallback Mode Ready
+                  Active in <strong className="text-cyan-700 dark:text-cyan-300">{activeState.name} ({activeState.code})</strong> · Dynamic Prompts Active
                 </p>
               </div>
             </div>
@@ -67,12 +119,7 @@ export default function TouristGuardian() {
             onSendMessage={respond}
             height="560px"
             placeholder={`Ask about ${activeState.name} safety advisories, emergency numbers, or safer route options…`}
-            suggestedPrompts={[
-              `Emergency numbers for ${activeState.name}?`,
-              `Why is my current location risky?`,
-              `Which safe places can I visit in ${activeState.name}?`,
-              `What is the safer route detour option?`,
-            ]}
+            suggestedPrompts={dynamicPrompts}
             className="rounded-none border-0 shadow-none bg-transparent"
           />
         </section>

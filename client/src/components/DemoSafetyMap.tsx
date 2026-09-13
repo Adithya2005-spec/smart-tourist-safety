@@ -48,7 +48,7 @@ export function DemoSafetyMap({
   compact?: boolean;
   onSelectZone?: (zoneId: string) => void;
 }) {
-  const { zones, incidents, location, simulateHighRisk, activeState } = useSafety();
+  const { zones, incidents, location, setLocation, simulateHighRisk, activeState } = useSafety();
 
   const allPoints = [location, ...zones.map((z) => z.center)];
   const bounds = computeBounds(allPoints);
@@ -62,10 +62,28 @@ export function DemoSafetyMap({
     };
   }
 
+  const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // If clicked on an interactive button or badge, ignore
+    if ((e.target as HTMLElement).closest("button") || (e.target as HTMLElement).closest("a")) {
+      return;
+    }
+    const rect = e.currentTarget.getBoundingClientRect();
+    const leftFrac = (e.clientX - rect.left) / rect.width;
+    const topFrac = (e.clientY - rect.top) / rect.height;
+    const lng = bounds.minLng + leftFrac * (bounds.maxLng - bounds.minLng);
+    const lat = bounds.maxLat - topFrac * (bounds.maxLat - bounds.minLat);
+    setLocation(
+      { lat: Number(lat.toFixed(4)), lng: Number(lng.toFixed(4)) },
+      `Pinned Location (${activeState.name})`
+    );
+  };
+
   return (
     <div
+      onClick={handleMapClick}
+      title="Click anywhere to move your live GPS location"
       className={cn(
-        "relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-[#e2edea] dark:bg-[#0c1a24] transition-colors duration-200 shadow-inner",
+        "relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-[#e2edea] dark:bg-[#0c1a24] transition-colors duration-200 shadow-inner cursor-crosshair group",
         compact ? "h-[350px]" : "h-[540px]",
       )}
     >
@@ -200,6 +218,14 @@ export function DemoSafetyMap({
           {activeState.name.toUpperCase()} · HAVERSINE EDGE GEOFENCING ACTIVE
         </div>
       )}
+
+      {/* Live GPS Coordinates & Interactive Notice */}
+      <div className="absolute left-4 bottom-4 z-20 hidden sm:flex items-center gap-2 rounded-xl bg-slate-900/90 border border-slate-700/80 px-3 py-1.5 text-[10px] font-mono text-slate-300 shadow-md backdrop-blur-md">
+        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+        <span>GPS: {location.lat.toFixed(4)}, {location.lng.toFixed(4)} ({activeState.code})</span>
+        <span className="text-slate-500">•</span>
+        <span className="text-cyan-300 font-sans font-semibold">Click map to drop GPS pin</span>
+      </div>
 
       {/* Simulation Button */}
       <div className="absolute right-4 top-4 z-20">

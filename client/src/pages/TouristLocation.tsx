@@ -1,4 +1,5 @@
 import { SafetyNotice, SafetyShell } from "@/components/SafetyShell";
+import { InterStateTransitSimulator } from "@/components/InterStateTransitSimulator";
 import { useSafety } from "@/contexts/SafetyContext";
 import { Clock3, MapPin, MapPinned, RadioTower, ShieldCheck, StopCircle, Lock, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
@@ -41,7 +42,10 @@ export default function TouristLocation() {
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-5xl gap-5 lg:grid-cols-[1.1fr_.9fr]">
+      <div className="mx-auto max-w-5xl space-y-5">
+        <InterStateTransitSimulator />
+
+        <div className="grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
         <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm text-slate-900 dark:text-slate-100">
           <div className="flex items-start justify-between">
             <div>
@@ -154,6 +158,7 @@ export default function TouristLocation() {
             </div>
           </SafetyNotice>
         </aside>
+        </div>
       </div>
     </SafetyShell>
   );

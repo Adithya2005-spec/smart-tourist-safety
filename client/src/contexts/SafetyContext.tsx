@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { seedContacts, seedIncidents, seedResponders, seedZones, touristProfile } from "@/lib/mock-safety-data";
 import { allIndianStates, getStateById, type IndianStateData } from "@/lib/india-safety-data";
+import { detectStateFromCoordinates } from "@/lib/inter-state-geofence";
+import { toast } from "sonner";
 import {
   assistantReply,
   canTransition,
@@ -806,7 +808,61 @@ export function SafetyProvider({ children }: { children: React.ReactNode }) {
     assignResponder,
     recordAudit,
     verifyAudit,
-    setLocation: (location, name) => setState((previous) => ({ ...previous, location, locationName: name ?? previous.locationName })),
+    setLocation: (coords, name) => {
+      const detectedState = detectStateFromCoordinates(coords.lat, coords.lng);
+
+      // If coordinates belong to another Indian State / UT, automatically transition the platform
+      if (detectedState && detectedState.id !== state.activeStateId) {
+        toast.info(`📍 Inter-State Border Crossed: Welcome to ${detectedState.name}!`, {
+          description: `Territory context synchronized to ${detectedState.name} (${detectedState.code}). Local police: ${detectedState.emergency.touristPolice || "112"}. Risk zones & Guardian AI updated.`,
+          duration: 5000,
+        });
+
+        const stateZones: RiskZone[] = detectedState.riskZones.map((rz) => ({
+          id: rz.id,
+          name: rz.name,
+          center: rz.center,
+          radiusM: rz.radiusM,
+          score: rz.score,
+          severity: getSeverityBand(rz.score),
+          band: rz.band,
+          incidentCount: rz.incidentCount,
+          updatedAt: new Date().toISOString(),
+          factor: rz.factor,
+        }));
+
+        const stateContacts: EmergencyContact[] = [
+          { id: "STATE-POLICE", name: `${detectedState.name} Tourist Police`, phone: detectedState.emergency.touristPolice, relationship: "Official Helpline", primary: true },
+          { id: "STATE-EMERGENCY", name: "National Emergency SOS (Demo)", phone: detectedState.emergency.police, relationship: "Central Police/Fire/Medical", primary: true },
+          { id: "STATE-WOMEN", name: "Women Safety Helpline (Demo)", phone: detectedState.emergency.womenHelpline, relationship: "Women Safeguard Desk", primary: false },
+          { id: "STATE-AMBULANCE", name: `${detectedState.name} Medical First Aid`, phone: detectedState.emergency.ambulance, relationship: "Ambulance Network", primary: false },
+        ];
+
+        setState((previous) => ({
+          ...previous,
+          activeStateId: detectedState.id,
+          location: coords,
+          locationName: name || detectedState.defaultLocationName,
+          zones: stateZones,
+          contacts: [
+            ...stateContacts,
+            ...previous.contacts.filter((c) => !c.id.startsWith("STATE-")),
+          ],
+          profile: {
+            ...previous.profile,
+            accommodation: `${detectedState.capital}, ${detectedState.name}`,
+          },
+        }));
+        return;
+      }
+
+      // Same state coordinate update
+      setState((previous) => ({
+        ...previous,
+        location: coords,
+        locationName: name ?? previous.locationName,
+      }));
+    },
     simulateHighRisk: () => {
       const dangerZone = state.zones.find((z) => z.band === "DANGER") || state.zones[0];
       if (dangerZone) {

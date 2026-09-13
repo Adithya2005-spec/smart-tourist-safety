@@ -1,5 +1,6 @@
 import { DemoSafetyMap, ZoneRiskList } from "@/components/DemoSafetyMap";
 import { RiskBadge, SafetyNotice, SafetyShell } from "@/components/SafetyShell";
+import { InterStateTransitSimulator } from "@/components/InterStateTransitSimulator";
 import { useSafety } from "@/contexts/SafetyContext";
 import { calculateRouteOptions, RouteOption } from "@/lib/route-engine";
 import { AlertTriangle, ArrowRight, CheckCircle2, Globe2, Navigation, Route, ShieldCheck, Info, Cpu, Zap } from "lucide-react";
@@ -63,6 +64,9 @@ export default function TouristMap() {
               </div>
             </SafetyNotice>
           )}
+
+          {/* Dynamic Inter-State Travel & GPS Auto-Territory Controller */}
+          <InterStateTransitSimulator />
 
           <DemoSafetyMap
             onSelectZone={(zoneId) => {

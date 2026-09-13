@@ -4,8 +4,10 @@
  * quick prompt suggestions, and structured safety advisories.
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { GuardianOutput } from "./useMultiAgentQuery";
+import type { IndianStateData } from "@/lib/india-safety-data";
+import { getStateSuggestedQueries } from "@/lib/guardian-dynamic-prompts";
 
 export interface ChatMessage {
   id: string;
@@ -22,39 +24,34 @@ export interface ChatMessage {
   };
 }
 
-export const SUGGESTED_QUERIES: Record<"en" | "hi" | "kn", string[]> = {
-  en: [
-    "Is it safe to walk around Cubbon Park right now?",
-    "Where is the nearest tourist police help desk?",
-    "What is the weather and crowd risk in Bengaluru today?",
-    "Show me the safest route to MG Road metro station",
-  ],
-  hi: [
-    "क्या इस समय कब्बन पार्क के आसपास घूमना सुरक्षित है?",
-    "निकटतम पर्यटन पुलिस सहायता केंद्र कहाँ है?",
-    "आज बेंगलुरु में मौसम और भीड़ का जोखिम क्या है?",
-    "एमजी रोड मेट्रो स्टेशन का सबसे सुरक्षित मार्ग दिखाएं",
-  ],
-  kn: [
-    "ಈ ಸಮಯದಲ್ಲಿ ಕಬ್ಬನ್ ಪಾರ್ಕ್ ಸುತ್ತಲೂ ನಡೆಯುವುದು ಸುರಕ್ಷಿತವೇ?",
-    "ಹತ್ತಿರದ ಪ್ರವಾಸಿ ಪೊಲೀಸ್ ಸಹಾಯ ಕೇಂದ್ರ ಎಲ್ಲಿದೆ?",
-    "ಇಂದು ಬೆಂಗಳೂರಿನಲ್ಲಿ ಹವಾಮಾನ ಮತ್ತು ಜನಸಂದಣಿಯ ಅಪಾಯವೇನು?",
-    "ಎಂಜಿ ರಸ್ತೆ ಮೆಟ್ರೋ ನಿಲ್ದಾಣಕ್ಕೆ ಸುರಕ್ಷಿತ ಮಾರ್ಗವನ್ನು ತೋರಿಸಿ",
-  ],
-};
-
-export function useGuardianAI(defaultLanguage: "en" | "hi" | "kn" = "en") {
+export function useGuardianAI(
+  defaultLanguage: "en" | "hi" | "kn" = "en",
+  state?: IndianStateData
+) {
   const [language, setLanguage] = useState<"en" | "hi" | "kn">(defaultLanguage);
+  const prevStateCodeRef = useRef<string | undefined>(state?.code);
+
+  const getWelcomeMessage = useCallback(
+    (lang: "en" | "hi" | "kn", activeState?: IndianStateData): string => {
+      const stateName = activeState?.name || "India";
+      const police = activeState?.emergency?.touristPolice || "112";
+
+      if (lang === "hi") {
+        return `नमस्ते! मैं सुरक्षा गार्जियन एआई हूँ। मैं **${stateName}** में आपकी सुरक्षा, मौसम, भीड़ और सुरक्षित मार्गों की निगरानी करता हूँ।\nपर्यटन पुलिस: **${police}** | आपातकालीन SOS: **112**।\nनीचे दिए गए सुझावों में से चुनें या कोई भी प्रश्न पूछें।`;
+      }
+      if (lang === "kn") {
+        return `ನಮಸ್ಕಾರ! ನಾನು ಸುರಕ್ಷಾ ಗಾರ್ಡಿಯನ್ AI. **${stateName}** ನಲ್ಲಿ ನಿಮ್ಮ ಸುರಕ್ಷತೆ, ಹವಾಮಾನ ಮತ್ತು ಸುರಕ್ಷಿತ ಮಾರ್ಗಗಳನ್ನು ನಾನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡುತ್ತೇನೆ.\nಪ್ರವಾಸಿ ಪೊಲೀಸ್: **${police}** | ತುರ್ತು SOS: **112**.\nಕೆಳಗಿನ ಸಲಹೆಗಳನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ ಅಥವಾ ಯಾವುದೇ ಪ್ರಶ್ನೆ ಕೇಳಿ.`;
+      }
+      return `Hello! I am Guardian AI, your intelligent tourist safety companion for **${stateName}**.\n\nActive State: **${stateName}** (${activeState?.capital || "Regional Capital"})\nTourist Police Helpline: **${police}** | Central SOS: **112**\n\nI monitor real-time zone risk, crowd surges, weather hazards, and safe corridors. How may I assist you?`;
+    },
+    []
+  );
+
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "msg-welcome",
       role: "guardian",
-      content:
-        defaultLanguage === "hi"
-          ? "नमस्ते! मैं सुरक्षा गार्जियन एआई हूँ। मैं आपके क्षेत्र की सुरक्षा, मौसम, भीड़ और सुरक्षित मार्गों की निगरानी करता हूँ। आप मुझसे कुछ भी पूछ सकते हैं।"
-          : defaultLanguage === "kn"
-          ? "ನಮಸ್ಕಾರ! ನಾನು ಸುರಕ್ಷಾ ಗಾರ್ಡಿಯನ್ AI. ನಿಮ್ಮ ಪ್ರದೇಶದ ಸುರಕ್ಷತೆ, ಹವಾಮಾನ ಮತ್ತು ಸುರಕ್ಷಿತ ಮಾರ್ಗಗಳ ಬಗ್ಗೆ ಯಾವುದೇ ಪ್ರಶ್ನೆ ಕೇಳಿ."
-          : "Hello! I am Guardian AI, your intelligent tourist safety companion. I monitor real-time zone risk, crowd density, weather hazards, and verified corridors. How may I assist you?",
+      content: getWelcomeMessage(defaultLanguage, state),
       timestamp: new Date().toISOString(),
       language: defaultLanguage,
       metadata: {
@@ -65,6 +62,60 @@ export function useGuardianAI(defaultLanguage: "en" | "hi" | "kn" = "en") {
     },
   ]);
   const [isAsking, setIsAsking] = useState(false);
+
+  // Dynamically compute suggested queries whenever active state or language changes
+  const suggestedQueries = useMemo(() => {
+    return getStateSuggestedQueries(state, language);
+  }, [state, language]);
+
+  // Reactive effect when user changes state in dropdown/selector
+  useEffect(() => {
+    if (!state) return;
+
+    if (prevStateCodeRef.current && prevStateCodeRef.current !== state.code) {
+      // If user only had the default welcome message, refresh it directly
+      setMessages((prev) => {
+        if (prev.length <= 1 && prev[0]?.id.startsWith("msg-welcome")) {
+          return [
+            {
+              id: `msg-welcome-${state.code}`,
+              role: "guardian",
+              content: getWelcomeMessage(language, state),
+              timestamp: new Date().toISOString(),
+              language,
+              metadata: {
+                confidence: 0.98,
+                urgency: "INFO",
+                provenance: "GUARDIAN_CORE",
+              },
+            },
+          ];
+        }
+
+        // Otherwise append an in-chat state transition notice
+        const switchNotice: ChatMessage = {
+          id: `state-switch-${state.code}-${Date.now()}`,
+          role: "guardian",
+          content:
+            language === "hi"
+              ? `📍 **राज्य परिवर्तन: ${state.name} (${state.capital})**\nगार्जियन एआई अब **${state.name}** के सत्यापित डेटा से जुड़ गया है।\n• पर्यटन पुलिस: **${state.emergency?.touristPolice || "112"}** | SOS: **112**\n• मुख्य सुरक्षित केंद्र: **${state.safePoints?.[0]?.name || state.capital}**\nसुझाए गए प्रश्न ${state.name} के अनुसार अपडेट कर दिए गए हैं।`
+              : language === "kn"
+              ? `📍 **ರಾಜ್ಯ ಬದಲಾವಣೆ: ${state.name} (${state.capital})**\nಗಾರ್ಡಿಯನ್ AI ಈಗ **${state.name}** ನ ದೃಢೀಕೃತ ತುರ್ತು ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ.\n• ಪ್ರವಾಸಿ ಪೊಲೀಸ್: **${state.emergency?.touristPolice || "112"}** | SOS: **112**\n• ಮುಖ್ಯ ಸುರಕ್ಷಿತ ಸ್ಥಳ: **${state.safePoints?.[0]?.name || state.capital}**\nಪ್ರಶ್ನೆ ಸಲಹೆಗಳು ${state.name} ಗೆ ಅಪ್‌ಡೇಟ್ ಆಗಿವೆ.`
+              : `📍 **State Grounding Switched to ${state.name} (${state.capital})**\nGuardian AI is now grounded in **${state.name}**'s verified security and emergency infrastructure.\n• Tourist Police: **${state.emergency?.touristPolice || "112"}** | Central SOS: **112**\n• Primary Safe Zone: **${state.safePoints?.[0]?.name || state.capital}**\nPrompts below have been dynamically updated for ${state.name}.`,
+          timestamp: new Date().toISOString(),
+          language,
+          metadata: {
+            confidence: 0.99,
+            urgency: "INFO",
+            provenance: "STATE_ROUTER",
+          },
+        };
+        return [...prev, switchNotice];
+      });
+    }
+
+    prevStateCodeRef.current = state.code;
+  }, [state?.code, language, getWelcomeMessage, state]);
 
   const sendMessage = useCallback(
     async (
@@ -163,6 +214,6 @@ export function useGuardianAI(defaultLanguage: "en" | "hi" | "kn" = "en") {
     setLanguage,
     sendMessage,
     clearChat,
-    suggestedQueries: SUGGESTED_QUERIES[language] || SUGGESTED_QUERIES.en,
+    suggestedQueries,
   };
 }
