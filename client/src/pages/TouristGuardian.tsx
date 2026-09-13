@@ -26,7 +26,19 @@ export default function TouristGuardian() {
   const safe = zones.find((zone) => zone.band === "SAFE" || zone.severity === "LOW");
 
   return (
-    <SafetyShell eyebrow="Traveller workspace" title="Guardian AI Decision Assistant">
+    <SafetyShell
+      eyebrow="Traveller workspace"
+      title="Guardian AI Decision Assistant"
+      actions={
+        <Link
+          href="/tourist/guardian-ai"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition"
+        >
+          <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+          Launch Multi-Agent Intelligence
+        </Link>
+      }
+    >
       <div className="grid gap-5 xl:grid-cols-[1.25fr_.55fr]">
         <section className="overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 px-5 py-4">
