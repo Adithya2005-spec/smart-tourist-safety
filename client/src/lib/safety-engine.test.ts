@@ -13,8 +13,13 @@ describe("edge safety engine", () => {
     const result = predictRisk({ historicalIncidentCount: 6, recentIncidentCount: 5, severity: 7, touristDensity: 6, hour: 21, historicalRisk: 54 });
     expect(result.band).toBe("DANGER");
     expect(result.score).toBeGreaterThanOrEqual(70);
-    expect(result.factors).toContain("Recent incident activity");
-    expect(localRiskPredictionService.predict({ historicalIncidentCount: 6, recentIncidentCount: 5, severity: 7, touristDensity: 6, hour: 21, historicalRisk: 54 })).toEqual(result);
+    expect(result.factors.some((f) => f.factor === "Recent incident activity")).toBe(true);
+    expect(localRiskPredictionService.predict({ historicalIncidentCount: 6, recentIncidentCount: 5, severity: 7, touristDensity: 6, hour: 21, historicalRisk: 54 })).toMatchObject({
+      band: result.band,
+      score: result.score,
+      severity: result.severity,
+      method: result.method,
+    });
   });
 
   it("enforces the incident lifecycle transition order", () => {

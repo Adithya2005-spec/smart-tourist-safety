@@ -71,7 +71,7 @@ export function useGuardianAI(defaultLanguage: "en" | "hi" | "kn" = "en") {
       queryText: string,
       context?: {
         overallRiskScore?: number;
-        riskTier?: "LOW" | "MODERATE" | "HIGH" | "CRITICAL";
+        riskTier?: string;
         locationName?: string;
       }
     ) => {

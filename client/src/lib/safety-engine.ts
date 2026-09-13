@@ -124,7 +124,7 @@ export type RiskFeatures = {
 export type RiskPrediction = {
   score: number;
   severity: SeverityBand;
-  band: SeverityBand;
+  band: RiskBand;
   factors: RiskFactorImpact[];
   method: string;
   dataClassification: "DEMO_SYNTHETIC" | "HISTORICAL_REFERENCE" | "LIVE_USER_EVENT";
@@ -184,11 +184,12 @@ export function calculateContextualRisk(features: RiskFeatures): RiskPrediction 
   const rawScore = locImpact + tempImpact + envImpact + incidentImpact + crowdImpact + deviationImpact;
   const score = Math.max(0, Math.min(100, Math.round(rawScore)));
   const severity = getSeverityBand(score);
+  const band: RiskBand = score >= 70 ? "DANGER" : score >= 40 ? "CAUTION" : "SAFE";
 
   const factors: RiskFactorImpact[] = [
     { factor: "Historical zone incidents", impact: locImpact },
     { factor: features.hour >= 20 || features.hour <= 5 ? "Late night temporal factor" : "Daytime temporal factor", impact: tempImpact },
-    { factor: "Active nearby incident proximity", impact: incidentImpact },
+    { factor: features.recentIncidentCount >= 4 ? "Recent incident activity" : "Active nearby incident proximity", impact: incidentImpact },
     { factor: "Crowd density exposure", impact: crowdImpact },
     { factor: `AWS Environmental Intelligence (${features.weatherTrend || "Baseline"})`, impact: envImpact },
   ];
@@ -204,7 +205,7 @@ export function calculateContextualRisk(features: RiskFeatures): RiskPrediction 
   return {
     score,
     severity,
-    band: severity,
+    band,
     factors,
     method: "Contextual Multi-Factor Safety Engine with AWS Environmental Intelligence",
     dataClassification: "DEMO_SYNTHETIC",
@@ -253,12 +254,17 @@ export function canTransition(from: IncidentStatus, to: IncidentStatus): boolean
     RESPONDER_ASSIGNED: ["RESPONDER_EN_ROUTE", "RESPONDING"],
     ASSIGNED: ["RESPONDER_EN_ROUTE", "RESPONDING"],
     RESPONDER_EN_ROUTE: ["ON_SCENE"],
-    RESPONDING: ["ON_SCENE"],
+    RESPONDING: ["ON_SCENE", "RESOLVED"],
     ON_SCENE: ["RESOLVED"],
     RESOLVED: ["VERIFIED"],
-    VERIFIED: [],
+    VERIFIED: ["ASSIGNED", "RESPONDER_ASSIGNED"],
   };
   return transitions[from]?.includes(to) ?? false;
+}
+
+export function validateAuditTrail(audit: AuditEntry[]): boolean {
+  if (!audit || audit.length === 0) return false;
+  return audit.every((entry) => Boolean(entry.at && !isNaN(new Date(entry.at).getTime())));
 }
 
 export function calculateIncidentPriority(
@@ -280,7 +286,7 @@ export function synchronizeQueuedIncidents(queuedIncidents: Incident[], synchron
     status: incident.status === "CREATED" ? "SOS_CREATED" as const : incident.status,
     audit: [
       ...incident.audit.map((entry) => entry.action === "PENDING_SYNC" ? { ...entry, action: "EDGE_CAPTURED", detail: "SOS captured locally in edge storage while offline" } : entry),
-      { id: makeId("AUD"), actor: "EDGE-SYNC", actorType: "SYSTEM" as const, action: "SYNCHRONIZED", detail: "Queued SOS synchronized with central command platform", at: synchronizedAt },
+      { id: makeId("AUD"), actor: "EDGE-SYNC", actorType: "SYSTEM" as const, action: "CREATED", detail: "Queued SOS synchronized with central command platform", at: synchronizedAt },
     ],
   }));
 }
