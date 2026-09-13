@@ -1,4 +1,12 @@
-import "dotenv/config";
+import { fileURLToPath } from "url";
+import path from "path";
+// Load .env from the project root regardless of working directory
+import dotenv from "dotenv";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const projectRoot = path.resolve(__dirname, "../../");
+dotenv.config({ path: path.join(projectRoot, ".env") });
+
 import express from "express";
 import { createServer } from "http";
 import net from "net";
@@ -57,7 +65,13 @@ async function startServer() {
   const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
   server.listen(port, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${port}/`);
+    console.log(`\n🛡️  Suraksha Link — Server running on http://localhost:${port}/`);
+    console.log(`📦  ENV loaded from: ${path.join(projectRoot, ".env")}`);
+    console.log(`🔑  API Key Status:`);
+    console.log(`     Gemini AI   : ${process.env.GEMINI_API_KEY ? "✅ Configured" : "⚠️  Not set (using deterministic fallback)"}`);
+    console.log(`     OpenRouter  : ${process.env.OPENROUTER_API_KEY ? "✅ Configured" : "⚠️  Not set"}`);
+    console.log(`     Resend      : ${process.env.RESEND_API_KEY ? "✅ Configured — real emails will be dispatched" : "⚠️  Not set (alerts logged locally)"}`);
+    console.log(`     Google Maps : ${process.env.GOOGLE_MAPS_API_KEY ? "✅ Configured" : "⚠️  Not set (using built-in GIS engine)"}\n`);
   });
 }
 
