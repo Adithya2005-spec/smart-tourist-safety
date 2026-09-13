@@ -7,6 +7,7 @@
 
 import { ValidationSummary } from "./evidence-validator";
 import { invokeOpenRouter, isOpenRouterConfigured } from "../services/openrouter";
+import { invokeGemini, isGeminiConfigured } from "../services/gemini";
 
 export interface GuardianAIInput {
   userQuery: string;
@@ -75,9 +76,7 @@ export async function runGuardianAI(input: GuardianAIInput): Promise<GuardianAIO
   const risk = input.overallRiskScore ?? 25;
   const tier = input.riskTier || (risk > 65 ? "CRITICAL" : risk > 45 ? "HIGH" : risk > 25 ? "MODERATE" : "LOW");
 
-  // If OpenRouter is configured, generate LLM-powered context-aware explanation
-  if (isOpenRouterConfigured()) {
-    const systemPrompt = `You are Guardian AI, the intelligence core of Suraksha Link Tourist Safety Platform in India.
+  const systemPrompt = `You are Guardian AI, the intelligence core of Suraksha Link Tourist Safety Platform in India.
 Your mission is tourist protection, clarity, and calm authority.
 Always format your response with empathy and precision.
 Language requested: ${lang === "hi" ? "Hindi (Devanagari)" : lang === "kn" ? "Kannada" : "English"}.
@@ -91,42 +90,86 @@ Provide:
 2. 2-3 specific actionable tips
 3. Single high-priority recommended action`;
 
-    const userPrompt = `Tourist query: "${input.userQuery}"\nContext: Current risk score is ${risk}/100 (${tier}).`;
+  const userPrompt = `Tourist query: "${input.userQuery}"\nContext: Current risk score is ${risk}/100 (${tier}).`;
 
-    const llmRes = await invokeOpenRouter({
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      temperature: 0.2,
-      maxTokens: 500,
-    });
+  // 1. Prioritize Google Gemini when configured (fastest latency & native multilingual capabilities)
+  if (isGeminiConfigured()) {
+    try {
+      const geminiRes = await invokeGemini({
+        systemInstruction: systemPrompt,
+        prompt: userPrompt,
+        temperature: 0.2,
+        maxTokens: 500,
+        model: "gemini-1.5-flash",
+      });
 
-    if (llmRes.success && llmRes.content) {
-      return {
-        agentName: "guardian_ai",
-        timestamp: new Date().toISOString(),
-        query: input.userQuery,
-        language: lang,
-        explanation: llmRes.content,
-        keySafetyTips: [
-          "Follow marked tourist safety corridors",
-          "Keep local emergency contacts (112, 108) on speed dial",
-          "Ensure device battery and offline SOS cache are active",
-        ],
-        recommendedAction: {
-          actionText: risk > 50 ? "Proceed via Safe Tourist Corridor with verified CCTV." : "Continue planned itinerary with standard awareness.",
-          urgency: risk > 65 ? "IMMEDIATE_ACTION" : risk > 40 ? "WARNING" : "ADVISORY",
-          hitlRequired: risk > 65,
-        },
-        confidence: 0.95,
-        modelProvenance: `OPENROUTER (${llmRes.modelUsed})`,
-        latencyMs: Date.now() - startTime,
-      };
+      if (geminiRes.success && geminiRes.content) {
+        return {
+          agentName: "guardian_ai",
+          timestamp: new Date().toISOString(),
+          query: input.userQuery,
+          language: lang,
+          explanation: geminiRes.content,
+          keySafetyTips: [
+            "Follow marked tourist safety corridors",
+            "Keep local emergency contacts (112, 108) on speed dial",
+            "Ensure device battery and offline SOS cache are active",
+          ],
+          recommendedAction: {
+            actionText: risk > 50 ? "Proceed via Safe Tourist Corridor with verified CCTV." : "Continue planned itinerary with standard awareness.",
+            urgency: risk > 65 ? "IMMEDIATE_ACTION" : risk > 40 ? "WARNING" : "ADVISORY",
+            hitlRequired: risk > 65,
+          },
+          confidence: 0.96,
+          modelProvenance: `GOOGLE_GEMINI (${geminiRes.modelUsed})`,
+          latencyMs: Date.now() - startTime,
+        };
+      }
+    } catch {
+      // Fall through to OpenRouter or deterministic fallback
     }
   }
 
-  // Deterministic Fallback Engine
+  // 2. Secondary: OpenRouter LLM Gateway
+  if (isOpenRouterConfigured()) {
+    try {
+      const llmRes = await invokeOpenRouter({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.2,
+        maxTokens: 500,
+      });
+
+      if (llmRes.success && llmRes.content) {
+        return {
+          agentName: "guardian_ai",
+          timestamp: new Date().toISOString(),
+          query: input.userQuery,
+          language: lang,
+          explanation: llmRes.content,
+          keySafetyTips: [
+            "Follow marked tourist safety corridors",
+            "Keep local emergency contacts (112, 108) on speed dial",
+            "Ensure device battery and offline SOS cache are active",
+          ],
+          recommendedAction: {
+            actionText: risk > 50 ? "Proceed via Safe Tourist Corridor with verified CCTV." : "Continue planned itinerary with standard awareness.",
+            urgency: risk > 65 ? "IMMEDIATE_ACTION" : risk > 40 ? "WARNING" : "ADVISORY",
+            hitlRequired: risk > 65,
+          },
+          confidence: 0.95,
+          modelProvenance: `OPENROUTER (${llmRes.modelUsed})`,
+          latencyMs: Date.now() - startTime,
+        };
+      }
+    } catch {
+      // Fall through to deterministic fallback
+    }
+  }
+
+  // 3. Deterministic Fallback Engine (Zero-dependency safety guarantee)
   const templates = FALLBACK_RESPONSES[lang] || FALLBACK_RESPONSES.en;
   let explanation = templates.safeSummary;
   let urgency: "INFO" | "ADVISORY" | "WARNING" | "IMMEDIATE_ACTION" = "INFO";
